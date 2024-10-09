@@ -6,7 +6,7 @@
 //2. Player/ABPlayerController.h
 AABGameMode::AABGameMode()
 {
-	static ConstructorHelpers::FClassFinder<APawn> ThirdPersonClassRef(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C"));
+	static ConstructorHelpers::FClassFinder<APawn> ThirdPersonClassRef(TEXT("/Script/ArenaBattle.ABCharacterPlayer"));
 	check(ThirdPersonClassRef.Class);
 	DefaultPawnClass = ThirdPersonClassRef.Class;
 
