@@ -7,6 +7,8 @@
 #include "InputActionValue.h"	//UInputAction에 필요, EnhancedInput 모듈 추가 필요
 #include "ABCharacterPlayer.generated.h"
 
+
+
 /**
  * 
  */
@@ -17,11 +19,13 @@ class ARENABATTLE_API AABCharacterPlayer : public AABCharacterBase
 public:
 	AABCharacterPlayer();
 
-protected:
-	virtual void BeginPlay() override;
-
-public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+//Player Control Section
+protected:
+	void SwitchCameraViewMode();
+	
+	virtual void SetCharacterControlData(const class UABCharacterControlData* ControlData) override;
 
 //Camera Section
 protected:
@@ -31,23 +35,34 @@ protected:
 
 	//카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UCameraComponent> FollowCamera;
+	TObjectPtr<class UCameraComponent> Cam;
 
 //Input Section
 protected:
+	//Shoulder Actions
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
+	TObjectPtr<class UInputAction> ShoulderMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> MoveAction;
+	TObjectPtr<class UInputAction> ShoulderLookAction;
+	////////////////////////////////////////////////////
+
+	//Quater Actions
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> QuarterMoveAction;
+	////////////////////////////////////////////////
+
+	//Shared Actions
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> SharedJumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> JumpAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> LookAction;
+	TObjectPtr<class UInputAction> SwitchViewAction;
+	//////////////////////////////////////////////////
 
 	//매핑할 함수
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	void ShoulderMove(const FInputActionValue& Value);
+	void ShoulderLook(const FInputActionValue& Value);
+
+	void QuarterMove(const FInputActionValue& Value);
 };
