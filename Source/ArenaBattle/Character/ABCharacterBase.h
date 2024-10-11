@@ -43,6 +43,8 @@ protected:
 	//DECLARE_DELEGATE_TwoParams( FOnMontageEnded, class UAnimMontage*, bool /*bInterrupted*/) 
 	//이 델리게이트에 맞춘 함수이다.
 	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsproperlyEnded);
+	void SetComboCheckTimer();	//입력 제한시간 지정
+	void ComboCheck();			//콤보 확인
 
 private:
 	void DefaultPawnSetting();
@@ -58,10 +60,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<UABCharacterControlData>> CameraModeSettings;
 
-	//이 항목은 블루프린트에서 지정할 예정
+	//콤보 몽타주 정보, 블루프린트에서 지정할 예정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
 
-	//internal
-	int32 CurrentCombo = 0;
+	//콤보 액션 데이터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UABComboActionData> ComboActionData;
+
+	//internal montage process values
+	int32 CurrentCombo = 0;	//현재 콤보 단계 수(0 == 콤보 중 아님)
+	FTimerHandle ComboTimerHandle;	//시간이 지나면 함수를 호출해주는 핸들
+	bool HasNextComboCommand = false;	//제한시간 안에(선입력 타임) 다음 콤보 입력이 들어왔는지
 };

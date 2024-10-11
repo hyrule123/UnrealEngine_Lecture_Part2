@@ -63,10 +63,6 @@ protected:
 	TObjectPtr<class UInputAction> AttackAction;
 	//////////////////////////////////////////////////
 
-	//블루프린트에서 지정할 예정
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UABComboActionData> ComboAttackData;
-
 	//매핑할 함수
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);

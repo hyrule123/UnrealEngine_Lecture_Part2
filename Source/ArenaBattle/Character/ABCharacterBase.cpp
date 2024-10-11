@@ -2,12 +2,16 @@
 #include "Character/ABCharacterBase.h"
 
 #include "Character/ABCharacterControlData.h"
+#include "Character/ABComboActionData.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+//콤보 공격속도, 일단 상수값으로 지정한다.
+constexpr const float AttackSpeedRate = 1.f;
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -65,6 +69,19 @@ void AABCharacterBase::ProcessComboCommand()
 	if (CurrentCombo == 0)
 	{
 		ComboActionBegin();
+		return;
+	}
+
+	//타이머가 켜져 있다면 입력을 통해 후속 콤보를 이어나갈 수 있다.
+	if (ComboTimerHandle.IsValid())
+	{
+		HasNextComboCommand = true;
+	}
+
+	//타이머가 꺼져있으면 콤보 진행 중단
+	else
+	{
+		HasNextComboCommand = false;
 	}
 }
 
@@ -75,9 +92,6 @@ void AABCharacterBase::ComboActionBegin()
 	//공격 중에는 움직임을 제한한다.
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
-	//공속: 일단은 상수값으로 지정
-	constexpr float AttackSpeedRate = 1.0f;
-
 	//Montage는 AnimInst에서 재생이 가능하다.
 	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
 	AnimInst->Montage_Play(ComboActionMontage);
@@ -86,6 +100,10 @@ void AABCharacterBase::ComboActionBegin()
 	FOnMontageEnded EndDelegate{};
 	EndDelegate.BindUObject(this, &AABCharacterBase::ComboActionEnd);
 	AnimInst->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+	
+	//비활성화하고 타이머 시작
+	ComboTimerHandle.Invalidate();
+	SetComboCheckTimer();
 }
 
 void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsproperlyEnded)
@@ -93,6 +111,45 @@ void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool Isproper
 	ensure(CurrentCombo != 0);
 	CurrentCombo = 0;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+}
+
+void AABCharacterBase::SetComboCheckTimer()
+{
+	int32 CurrentComboIdx = CurrentCombo - 1;
+	ensure(ComboActionData && ComboActionData->EffectiveFrameCount.IsValidIndex(CurrentComboIdx));
+
+	//제한 프레임 장수 / 초당 프레임 시간 / 공속
+	float ComboEffectiveTime = ComboActionData->EffectiveFrameCount[CurrentComboIdx] / ComboActionData->FrameRate / AttackSpeedRate;
+
+	if (0.f < ComboEffectiveTime)
+	{
+		//타이머 핸들을 활용하여 ComboEffectiveTime 시간 후에 호출되는 함수를 등록
+		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &AABCharacterBase::ComboCheck, ComboEffectiveTime, false);
+	}
+}
+
+void AABCharacterBase::ComboCheck()
+{
+	//타이머 OFF
+	ComboTimerHandle.Invalidate();
+
+	//시간 안에 다음 콤보 커맨드가 들어왔으면 다음 콤보 몽타주로 넘어간다.
+	if (HasNextComboCommand)
+	{
+		HasNextComboCommand = false;
+
+		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+
+		//최대 콤보 범위 안으로 제한을 걸어준다.
+		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+
+		//몽타주에 저장된 Section 이름은 FName 형태이다.
+		FName NextSectionName = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
+		AnimInst->Montage_JumpToSection(NextSectionName, ComboActionMontage);
+
+		//다음 콤보까지 제한시간을 새로 등록한다.
+		SetComboCheckTimer();
+	}
 }
 
 void AABCharacterBase::DefaultPawnSetting()
