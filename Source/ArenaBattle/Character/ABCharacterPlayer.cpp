@@ -57,6 +57,13 @@ AABCharacterPlayer::AABCharacterPlayer()
 		check(SwitchViewActionRef.Succeeded());
 		SwitchViewAction = SwitchViewActionRef.Object;
 	}
+
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionRef
+		(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_Attack.IA_Attack'"));
+		check(AttackActionRef.Succeeded());
+		AttackAction = AttackActionRef.Object;
+	}
 }
 
 void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -77,6 +84,8 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(QuarterMoveAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::QuarterMove);
 
 	EnhancedInputComponent->BindAction(SwitchViewAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::SwitchCameraViewMode);
+
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Attack);
 }
 
 void AABCharacterPlayer::SwitchCameraViewMode()
@@ -139,4 +148,9 @@ void AABCharacterPlayer::QuarterMove(const FInputActionValue& Value)
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	AddMovementInput(FVector::ForwardVector, MovementVector.X);
 	AddMovementInput(FVector::RightVector, MovementVector.Y);
+}
+
+void AABCharacterPlayer::Attack()
+{
+	ProcessComboCommand();
 }

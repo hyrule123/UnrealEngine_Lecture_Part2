@@ -3,10 +3,11 @@
 
 #include "Character/ABCharacterControlData.h"
 
-#include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Animation/AnimMontage.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -56,6 +57,42 @@ void AABCharacterBase::SetCameraViewMode(ECameraViewMode Mode)
 	check(CameraModeSettings.IsValidIndex((int32)Mode) && CameraModeSettings[(int32)Mode]);
 	CurCamViewMode = Mode;
 	SetCharacterControlData(CameraModeSettings[(int32)Mode]);
+}
+
+void AABCharacterBase::ProcessComboCommand()
+{
+	//콤보 값이 0일때, 즉 콤보공격이 아직 시작되지 않았을 때
+	if (CurrentCombo == 0)
+	{
+		ComboActionBegin();
+	}
+}
+
+void AABCharacterBase::ComboActionBegin()
+{
+	CurrentCombo = 1;
+
+	//공격 중에는 움직임을 제한한다.
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+	//공속: 일단은 상수값으로 지정
+	constexpr float AttackSpeedRate = 1.0f;
+
+	//Montage는 AnimInst에서 재생이 가능하다.
+	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+	AnimInst->Montage_Play(ComboActionMontage);
+
+	//끝났을 때 호출할 델리게이트 등록
+	FOnMontageEnded EndDelegate{};
+	EndDelegate.BindUObject(this, &AABCharacterBase::ComboActionEnd);
+	AnimInst->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+}
+
+void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsproperlyEnded)
+{
+	ensure(CurrentCombo != 0);
+	CurrentCombo = 0;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void AABCharacterBase::DefaultPawnSetting()
