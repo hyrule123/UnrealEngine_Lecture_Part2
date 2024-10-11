@@ -54,7 +54,7 @@ void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* Co
 void AABCharacterBase::SetCameraViewMode(ECameraViewMode Mode)
 {
 	check(CameraModeSettings.IsValidIndex((int32)Mode) && CameraModeSettings[(int32)Mode]);
-
+	CurCamViewMode = Mode;
 	SetCharacterControlData(CameraModeSettings[(int32)Mode]);
 }
 
@@ -97,7 +97,7 @@ void AABCharacterBase::DefaultMeshSetting()
 	}
 
 	//직접 생성한 Animation Blueprint로부터 AnimInstance 정보를 가져온다.
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/ArenaBattle/Animation/ABP_ABCharacter.ABP_ABCharacter_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/ArenaBattle/Animation/ABP_AnimCharacter.ABP_AnimCharacter_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
