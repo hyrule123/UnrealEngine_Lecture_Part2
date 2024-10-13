@@ -3,12 +3,14 @@
 
 #include "Character/ABCharacterControlData.h"
 #include "Character/ABComboActionData.h"
+#include "Physics/ABCollision.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/DamageEvents.h"
 
 //콤보 공격속도, 일단 상수값으로 지정한다.
 constexpr const float AttackSpeedRate = 1.f;
@@ -19,11 +21,101 @@ AABCharacterBase::AABCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	DefaultPawnSetting();
-	DefaultCapsuleSetting();
-	DefaultMovementSetting();
-	DefaultMeshSetting();
-	DefaultCharacterControlDataSetting();
+	{//Pawn Setting
+		//이 값을 true로 바꾸면 즉시 입력 컨트롤 값에 폰이 동기화 된다
+		//쉽게말해 카메라를 돌리면 폰도 바로 회전한다.
+		bUseControllerRotationPitch = false;
+		bUseControllerRotationYaw = false;
+		bUseControllerRotationRoll = false;
+	}
+
+	{//Capsule Component Setting
+		UCapsuleComponent* CapsuleCom = GetCapsuleComponent();
+		CapsuleCom->InitCapsuleSize(42.f, 96.0f);
+
+		//충돌 프로필을 프로젝트 내부 지정
+		CapsuleCom->SetCollisionProfileName(CPROFILE_ABCAPSULE);
+	}
+
+
+	{//Character Movement Setting
+		UCharacterMovementComponent* MoveCom = GetCharacterMovement();
+		MoveCom->bOrientRotationToMovement = true;
+		MoveCom->RotationRate = FRotator(0.0f, 500.f, 0.0f);
+		MoveCom->JumpZVelocity = 700.f;
+		MoveCom->AirControl = 0.35f;
+		MoveCom->MaxWalkSpeed = 500.f;
+		MoveCom->MinAnalogWalkSpeed = 20.f;
+		MoveCom->BrakingDecelerationWalking = 2000.f;
+	}
+
+
+	{
+		static ConstructorHelpers::FObjectFinder<UAnimMontage> ComboActionMontageRef
+		(TEXT("/Script/Engine.AnimMontage'/Game/ArenaBattle/Animation/AM_ComboAttack.AM_ComboAttack'"));
+		check(ComboActionMontageRef.Succeeded());
+		ComboActionMontage = ComboActionMontageRef.Object;
+
+		static ConstructorHelpers::FObjectFinder<UABComboActionData> ComboActionDataRef
+		(TEXT("/Script/ArenaBattle.ABComboActionData'/Game/ArenaBattle/CharacterAction/ABA_ComboAttack.ABA_ComboAttack'"));
+		check(ComboActionDataRef.Succeeded());
+		ComboActionData = ComboActionDataRef.Object;
+
+
+		static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef
+		(TEXT("/Script/Engine.AnimMontage'/Game/ArenaBattle/Animation/AM_Dead.AM_Dead'"));
+		check(DeadMontageRef.Succeeded());
+		DeadMontage = DeadMontageRef.Object;
+	}
+
+	{
+		// Mesh
+		USkeletalMeshComponent* SkltMesh = GetMesh();
+		SkltMesh->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
+		SkltMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+		//메쉬는 충돌판정 제거
+		SkltMesh->SetCollisionProfileName(TEXT("NoCollision"));
+
+		//InfinityBladeWarriors의 모델링으로 바꿔치기
+		{
+			static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Cardboard.SK_CharM_Cardboard'"));
+			if (CharacterMeshRef.Object)
+			{
+				SkltMesh->SetSkeletalMesh(CharacterMeshRef.Object);
+			}
+		}
+
+		{
+			//직접 생성한 Animation Blueprint로부터 AnimInstance 정보를 가져온다.
+			static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/ArenaBattle/Animation/ABP_AnimCharacter.ABP_AnimCharacter_C"));
+			if (AnimInstanceClassRef.Class)
+			{
+				SkltMesh->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+			}
+		}
+	}
+
+	{//Camera
+		CurCamViewMode = ECameraViewMode::Shoulder;
+
+		CameraModeSettings.SetNum((int32)ECameraViewMode::END);
+
+		{
+			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder'"));
+			check(ShoulderViewSettingRef.Succeeded());
+			CameraModeSettings[(int32)ECameraViewMode::Shoulder] = ShoulderViewSettingRef.Object;
+		}
+
+		{
+			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuarterViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Quarter.ABC_Quarter'"));
+			check(QuarterViewSettingRef.Succeeded());
+			CameraModeSettings[(int32)ECameraViewMode::Quarter] = QuarterViewSettingRef.Object;
+		}
+	}
+
+
+	DeadDestroyDelayTime = 5.f;
 }
 
 void AABCharacterBase::BeginPlay()
@@ -35,20 +127,6 @@ void AABCharacterBase::BeginPlay()
 
 void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* ControlData)
 {
-	//input 담당(Controller 액터)를 가져와서 만든 키매핑을 등록한다.
-	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
-
-	check(ControlData->InputMappingContext);
-
-	//Input Mapping을 실제로 운용하는 Subsystem을 가져온다.
-	if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>
-		(PlayerController->GetLocalPlayer()))
-	{
-		//0: 우선순위 -> 입력 충돌이 있을경우 우선순위 가 높은 입력을 우선 처리
-		SubSystem->AddMappingContext(ControlData->InputMappingContext, 0);
-	}
-
 	bUseControllerRotationYaw = ControlData->bUseControllerRotationYaw;
 
 	GetCharacterMovement()->bOrientRotationToMovement = ControlData->bOrientRotationToMovement;
@@ -101,7 +179,7 @@ void AABCharacterBase::ComboActionBegin()
 	EndDelegate.BindUObject(this, &AABCharacterBase::ComboActionEnd);
 	AnimInst->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
 	
-	//비활성화하고 타이머 시작
+	//타이머 재시작
 	ComboTimerHandle.Invalidate();
 	SetComboCheckTimer();
 }
@@ -152,63 +230,89 @@ void AABCharacterBase::ComboCheck()
 	}
 }
 
-void AABCharacterBase::DefaultPawnSetting()
+//애니메이션 노티파이 클래스 AnimNotify_AttackHitCheck 클래스에서 호출됨
+void AABCharacterBase::AttackHitCheck()
 {
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
-}
+	FHitResult OutHitResult;
+	//인자1: 언리얼 엔진 충돌 분석 툴에 사용되는 '태그' 
+	//인자2: 복잡한 형태의 충돌체에 충돌 처리를 할 것인지 말 것인지
+	//		이 때는 복잡한 형태의 충돌체에 올라서는 등의 행위만 할 수 있다.
+	//인자3: 
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
-void AABCharacterBase::DefaultCapsuleSetting()
-{
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
-}
+	//공격 정보
+	constexpr float AttackRange = 40.f;
+	constexpr float AttackRadius = 50.f;
+	constexpr float AttackDamage = 30.f;
 
-void AABCharacterBase::DefaultMovementSetting()
-{
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 100.f, 0.0f);
-	GetCharacterMovement()->JumpZVelocity = 700.f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
-	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
-	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
-}
+	//Sweep 이므로 시작점과 끝점이 필요.
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
 
-void AABCharacterBase::DefaultMeshSetting()
-{
-	// Mesh
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
-	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+	//Sweep 충돌 방식으로, 하나만, 채널 기준으로 충돌 확인.
+	//충돌 시 OutHitResult에 결과 값이 들어온다.
+	//Start, End: 충돌 시작, 끝 지점
+	//Rot: 회전
+	//TraceChannel: 아까 만들었던 그 트레이스 채널과 연동된 Enum 값
+	//투사시킬 충돌체: 50짜리로 새로 생성
+	//Params: 위쪽에 설명함
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, CCHANNEL_ABACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
 
-	//InfinityBladeWarriors의 모델링으로 바꿔치기
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Cardboard.SK_CharM_Cardboard'"));
-	if (CharacterMeshRef.Object)
+	//충돌했는지 확인
+	if (HitDetected)
 	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+		//공격이 무언가와 충돌했을 시 데미지를 상대방에게 전달한다.
+		FDamageEvent DamageEvent;
+		OutHitResult.GetActor()->TakeDamage(AttackDamage, DamageEvent, GetController(), this);
 	}
 
-	//직접 생성한 Animation Blueprint로부터 AnimInstance 정보를 가져온다.
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/ArenaBattle/Animation/ABP_AnimCharacter.ABP_AnimCharacter_C"));
-	if (AnimInstanceClassRef.Class)
-	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
-	}
+#if ENABLE_DRAW_DEBUG
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+	float CapsuleHalfHeight = AttackRange * 0.5f;
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	DrawDebugCapsule(
+		GetWorld(), 
+		CapsuleOrigin, 
+		CapsuleHalfHeight, 
+		AttackRadius, 
+		//캡슐을 눕혀줘야 하므로(Z축의 회전 상태만 가져온다.)
+		FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(),
+		DrawColor, 
+		false, //계속해서 그릴 것인지
+		3.0f);	//지속 시간
+#endif
 }
 
-void AABCharacterBase::DefaultCharacterControlDataSetting()
+//
+float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	CurCamViewMode = ECameraViewMode::Shoulder;
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	CameraModeSettings.SetNum((int32)ECameraViewMode::END);
+	//일단은 바로 죽는 모션을 출력
+	SetDead();
 
-	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder'"));
-	check(ShoulderViewSettingRef.Succeeded());
-	CameraModeSettings[(int32)ECameraViewMode::Shoulder] = ShoulderViewSettingRef.Object;
+	//최종적으로 액터가 받은 데미지 양을 의미
+	return DamageAmount;
+}
 
-	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuarterViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Quarter.ABC_Quarter'"));
-	check(QuarterViewSettingRef.Succeeded());
-	CameraModeSettings[(int32)ECameraViewMode::Quarter] = QuarterViewSettingRef.Object;
+void AABCharacterBase::SetDead()
+{
+	//일단 이동 제한을 걸어준다.
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+	PlayDeadAnimation();
+
+	//모든 충돌 판정 OFF
+	SetActorEnableCollision(false);
+}
+
+void AABCharacterBase::PlayDeadAnimation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	//기존의 애니메이션 정지
+	AnimInstance->StopAllMontages(0.0f);
+
+	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 }

@@ -22,29 +22,29 @@ AABCharacterPlayer::AABCharacterPlayer()
 	Cam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	Cam->bUsePawnControlRotation = false;
 
-	//Input: 레퍼런스로부터 가져온다.
-	{
+	
+	{//Input: 레퍼런스로부터 가져온다.
 		static ConstructorHelpers::FObjectFinder<UInputAction> ShoulderMoveActionRef
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_ShoulderMove.IA_ShoulderMove'"));
 		check(ShoulderMoveActionRef.Succeeded());
 		ShoulderMoveAction = ShoulderMoveActionRef.Object;
 	}
 
-	{
+	{//Jump Action
 		static ConstructorHelpers::FObjectFinder<UInputAction> SharedJumpActionRef
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_Jump.IA_Jump'"));
 		check(SharedJumpActionRef.Succeeded());
 		SharedJumpAction = SharedJumpActionRef.Object;
 	}
 
-	{
+	{//Should Look Action
 		static ConstructorHelpers::FObjectFinder<UInputAction> ShoulderLookActionRef
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_ShoulderLook.IA_ShoulderLook'"));
 		check(ShoulderLookActionRef.Succeeded());
 		ShoulderLookAction = ShoulderLookActionRef.Object;
 	}
 
-	{
+	{//Quarter Move Action
 		static ConstructorHelpers::FObjectFinder<UInputAction> QuarterMoveActionRef
 		(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_QuarterMove.IA_QuarterMove'"));
 		check(QuarterMoveActionRef.Succeeded());
@@ -115,6 +115,24 @@ void AABCharacterPlayer::SetCharacterControlData(const UABCharacterControlData* 
 	CameraBoom->bInheritYaw = ControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = ControlData->bInheritRoll;
 	CameraBoom->bDoCollisionTest = ControlData->bDoCollisionTest;
+
+	//input 담당(Controller 액터)를 가져와서 만든 키매핑을 등록한다.
+	//플레이어 캐릭터만 키매핑에 반응해야 하므로 이 작업은 여기서 해줘야 함.
+	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+
+	check(ControlData->InputMappingContext);
+
+	//Input Mapping을 실제로 운용하는 Subsystem을 가져온다.
+	if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
+		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>
+		(PlayerController->GetLocalPlayer()))
+	{
+		//기존의 키매핑 제거
+		SubSystem->ClearAllMappings();
+
+		//0: 우선순위 -> 입력 충돌이 있을경우 우선순위 가 높은 입력을 우선 처리
+		SubSystem->AddMappingContext(ControlData->InputMappingContext, 0);
+	}
 }
 
 void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
