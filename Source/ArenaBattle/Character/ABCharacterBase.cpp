@@ -3,12 +3,14 @@
 
 #include "Character/ABCharacterControlData.h"
 #include "Character/ABComboActionData.h"
+#include "CharacterStat/ABCharacterStatComponent.h"
 #include "Physics/ABCollision.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
 
@@ -112,6 +114,38 @@ AABCharacterBase::AABCharacterBase()
 			check(QuarterViewSettingRef.Succeeded());
 			CameraModeSettings[(int32)ECameraViewMode::Quarter] = QuarterViewSettingRef.Object;
 		}
+	}
+	
+	{//Stat Component
+		Stat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("Stat"));
+	}
+
+	//Widget Component
+	{
+		//UI Component는 말그대로 UI를 담는 그릇임
+		
+		HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+
+		//Transform 지정
+		HpBar->SetupAttachment(GetMesh());
+		HpBar->SetRelativeLocation(FVector(0.f, 0.f, 200.f));
+
+		/*
+		* 알멩이는 아까 만든 HP Bar 블루프린트인데,
+		* WidgetComponent는 오브젝트가 월드에 생성될 때(인스턴스화) 될 때 등록된 UI 클래스 정보를 통해 인스턴스화를 진행하는 방식이다.
+		* ConstructorHelper를 통해서 작업을 진행해 주자
+		*/
+		{
+			static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef
+			(TEXT("/Game/ArenaBattle/UI/WBP_HpBar.WBP_HpBar_C"));
+			ensure(HpBarWidgetRef.Succeeded());
+			HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		}
+
+
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(150.f, 15.f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 
