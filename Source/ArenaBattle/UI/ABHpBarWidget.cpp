@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "UI/ABHpBarWidget.h"
 
+#include "Interface/ABCharacterWidgetInterface.h"
+
 #include "Components/ProgressBar.h"
 
 UABHpBarWidget::UABHpBarWidget(const FObjectInitializer& ObjectInitializer)
@@ -17,6 +19,13 @@ void UABHpBarWidget::NativeConstruct()
 	//블루프린트 클래스
 	HpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("PB_HpBar")));
 	ensure(HpProgressBar);
+
+	//자신을 소유한 캐릭터 액터의 컴포넌트 주소를 받아온다.
+	IABCharacterWidgetInterface* CharacterWidget = Cast<IABCharacterWidgetInterface>(OwningActor);
+	if (CharacterWidget)
+	{
+		CharacterWidget->SetupCharacterWidget(this);
+	}
 }
 
 void UABHpBarWidget::UpdateHpBar(float NewCurrentHp)

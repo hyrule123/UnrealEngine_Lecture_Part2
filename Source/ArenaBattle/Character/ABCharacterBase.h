@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 
 #include "Interface/ABAnimationAttackInterface.h"
+#include "Interface/ABCharacterWidgetInterface.h"
 
 #include "ABCharacterBase.generated.h"
 
@@ -22,6 +23,7 @@ UCLASS()
 class ARENABATTLE_API AABCharacterBase 
 	: public ACharacter
 	, public IABAnimationAttackInterface
+	, public IABCharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -30,6 +32,7 @@ public:
 	AABCharacterBase();
 
 protected:
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void SetCharacterControlData(const UABCharacterControlData* ControlData);
 
@@ -94,5 +97,7 @@ protected://Stat Section
 
 protected://UI Widget Section
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UWidgetComponent> HpBar;
+	TObjectPtr<class UABWidgetComponent> HpBar;
+
+	virtual void SetupCharacterWidget(class UABUserWidget* InUserWidget) override;
 };

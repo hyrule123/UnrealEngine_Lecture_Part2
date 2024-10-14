@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/ABUserWidget.h"
 #include "ABHpBarWidget.generated.h"
 
 /**
@@ -11,18 +11,21 @@
  * 이 클래스를 상속받은 "블루프린트 클래스" 를 생성할 예정임.
  */
 UCLASS()
-class ARENABATTLE_API UABHpBarWidget : public UUserWidget
+class ARENABATTLE_API UABHpBarWidget : public UABUserWidget
 {
 	GENERATED_BODY()
 public:
 	UABHpBarWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	//UUserWidget에서 제공하는 가상함수
-	//이 함수가 호출 될 즈음이면 UI 오브젝트들의 초기화 작업이 완료된 상황이므로
-	//이 때 ProgressBar 포인터를 가져오면 된다.
+	/*
+	* UUserWidget에서 제공하는 가상함수
+	* 이 함수는 UWidgetComponent::InitWidget() 호출 이후 호출되는 함수이다.
+	* 이 함수가 호출 될 때는 UI 오브젝트들의 초기화 작업이 완료된 상황이므로
+	* 이 때 ProgressBar 위젯의 포인터를 가져오면 된다.
+	*/ 
 	virtual void NativeConstruct() override;
-
+	
 public:
 	void SetMaxHp(float InMaxHp) { MaxHp = InMaxHp; }
 	void UpdateHpBar(float NewCurrentHp);

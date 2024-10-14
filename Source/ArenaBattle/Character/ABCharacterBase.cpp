@@ -4,13 +4,15 @@
 #include "Character/ABCharacterControlData.h"
 #include "Character/ABComboActionData.h"
 #include "CharacterStat/ABCharacterStatComponent.h"
+
 #include "Physics/ABCollision.h"
+#include "UI/ABWidgetComponent.h"
+#include "UI/ABHpBarWidget.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
 
@@ -122,9 +124,8 @@ AABCharacterBase::AABCharacterBase()
 
 	//Widget Component
 	{
-		//UI Component는 말그대로 UI를 담는 그릇임
-		
-		HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+		//UI Component는 UI를 담는 그릇임
+		HpBar = CreateDefaultSubobject<UABWidgetComponent>(TEXT("Widget"));
 
 		//Transform 지정
 		HpBar->SetupAttachment(GetMesh());
@@ -142,7 +143,6 @@ AABCharacterBase::AABCharacterBase()
 			HpBar->SetWidgetClass(HpBarWidgetRef.Class);
 		}
 
-
 		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
 		HpBar->SetDrawSize(FVector2D(150.f, 15.f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -150,6 +150,13 @@ AABCharacterBase::AABCharacterBase()
 
 
 	DeadDestroyDelayTime = 5.f;
+}
+
+void AABCharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	Stat->OnHpZero.AddUObject(this, &AABCharacterBase::SetDead);
 }
 
 void AABCharacterBase::BeginPlay()
@@ -323,11 +330,8 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	//일단은 바로 죽는 모션을 출력
-	SetDead();
-
-	//최종적으로 액터가 받은 데미지 양을 의미
-	return DamageAmount;
+	//Stat에 받은 데미지를 적용
+	return Stat->ApplyDamage(DamageAmount);;
 }
 
 void AABCharacterBase::SetDead()
@@ -339,6 +343,9 @@ void AABCharacterBase::SetDead()
 
 	//모든 충돌 판정 OFF
 	SetActorEnableCollision(false);
+
+	//HP바는 숨겨준다
+	HpBar->SetHiddenInGame(true);
 }
 
 void AABCharacterBase::PlayDeadAnimation()
@@ -349,4 +356,16 @@ void AABCharacterBase::PlayDeadAnimation()
 	AnimInstance->StopAllMontages(0.0f);
 
 	AnimInstance->Montage_Play(DeadMontage, 1.0f);
+}
+
+void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
+{
+	//HP바를 설정해줄 것므로 Cast를 통해서 Hp Bar로 변경 후 값 설정
+	UABHpBarWidget* HpBarWidget = Cast<UABHpBarWidget>(InUserWidget);
+	if (HpBarWidget)
+	{
+		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UABHpBarWidget::UpdateHpBar);
+	}
 }
