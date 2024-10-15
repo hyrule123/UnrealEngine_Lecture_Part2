@@ -28,6 +28,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Effect)
 	TObjectPtr<class UParticleSystemComponent> Effect;
 
+	UPROPERTY(EditAnywhere, Category = Item)
+	TObjectPtr<class UABItemData> Item;
+
 	//PrimitiveComponent에 있는 델리게이트 함수 선언
 	//OnComponentBeginOverlap이라는 델리게이트 변수에 등록할 수 있다.
 	//블루프린트에서도 사용 가능한 Dynamic Delegete이므로 UFUNCION으로 지정이 필요하다.

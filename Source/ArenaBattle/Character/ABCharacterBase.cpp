@@ -9,12 +9,17 @@
 #include "UI/ABWidgetComponent.h"
 #include "UI/ABHpBarWidget.h"
 
+#include "Item/ABItemData.h"
+#include "Item/ABWeaponItemData.h"
+
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Animation/AnimMontage.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/DamageEvents.h"
+
+DEFINE_LOG_CATEGORY(LogABCharacter);
 
 //콤보 공격속도, 일단 상수값으로 지정한다.
 constexpr const float AttackSpeedRate = 1.f;
@@ -148,8 +153,23 @@ AABCharacterBase::AABCharacterBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-
 	DeadDestroyDelayTime = 5.f;
+
+	//Item Actions
+	//각각의 Enum값에 대응되는 델리게이트 함수를 연결한다.
+	TakeItemActions.SetNum((int32)EItemType::END);
+	TakeItemActions[(int32)EItemType::Weapon].ItemDelegate = 
+		FOnTakeItemDelegate::CreateUObject(this, &AABCharacterBase::EquipWeapon);
+	TakeItemActions[(int32)EItemType::Potion].ItemDelegate =
+		FOnTakeItemDelegate::CreateUObject(this, &AABCharacterBase::DrinkPotion);
+	TakeItemActions[(int32)EItemType::Scroll].ItemDelegate =
+		FOnTakeItemDelegate::CreateUObject(this, &AABCharacterBase::ReadScroll);
+
+	//Weapon Component
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+
+	//인피니티 메시에 지정된 소켓 이름에 붙여 준다.
+	Weapon->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
 }
 
 void AABCharacterBase::PostInitializeComponents()
@@ -368,4 +388,38 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UABHpBarWidget::UpdateHpBar);
 	}
+}
+
+void AABCharacterBase::TakeItem(UABItemData* InItemData)
+{
+	if (InItemData)
+	{
+		TakeItemActions[(uint8)InItemData->Type].ItemDelegate.ExecuteIfBound(InItemData);
+	}
+}
+
+void AABCharacterBase::DrinkPotion(UABItemData* InItemData)
+{
+	UE_LOG(LogABCharacter, Log, TEXT("Drink Potion"));
+}
+
+void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
+{
+	UABWeaponItemData* WeaponItemData = Cast<UABWeaponItemData>(InItemData);
+	if (WeaponItemData)
+	{
+		//아직 로드되지 않았다면
+		if (WeaponItemData->WeaponMesh.IsPending()) 
+		{
+			//로드한다.
+			WeaponItemData->WeaponMesh.LoadSynchronous();
+		}
+
+		Weapon->SetSkeletalMesh(WeaponItemData->WeaponMesh.Get());
+	}
+}
+
+void AABCharacterBase::ReadScroll(UABItemData* InItemData)
+{
+	UE_LOG(LogABCharacter, Log, TEXT("Read Scroll"));
 }

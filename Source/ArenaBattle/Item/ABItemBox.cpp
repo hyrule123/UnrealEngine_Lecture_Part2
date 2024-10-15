@@ -2,6 +2,7 @@
 #include "Item/ABItemBox.h"
 
 #include "Physics/ABCollision.h"
+#include "Interface/ABCharacterItemInterface.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -49,6 +50,19 @@ AABItemBox::AABItemBox()
 
 void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
+	//꽝
+	if (nullptr == Item) 
+	{
+		Destroy();
+		return;
+	}
+
+	IABCharacterItemInterface* ItemInterface = Cast<IABCharacterItemInterface>(OtherActor);
+	if (ItemInterface)
+	{
+		ItemInterface->TakeItem(Item);
+	}
+
 	//이펙트 발동시키고
 	Effect->Activate(true);
 	//메쉬 숨기고

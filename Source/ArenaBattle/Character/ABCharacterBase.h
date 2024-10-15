@@ -6,8 +6,11 @@
 
 #include "Interface/ABAnimationAttackInterface.h"
 #include "Interface/ABCharacterWidgetInterface.h"
+#include "Interface/ABCharacterItemInterface.h"
 
 #include "ABCharacterBase.generated.h"
+
+DECLARE_LOG_CATEGORY_EXTERN(LogABCharacter, Log, All);
 
 UENUM()
 enum class ECameraViewMode : uint32
@@ -17,6 +20,20 @@ enum class ECameraViewMode : uint32
 	END
 };
 
+//아이템 습득시 처리할 Delegate
+DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UABItemData* /*InItemData*/);
+
+//Delegate 타입은 배열로 선언할 수가 없어서 Wrapper 구조체가 필요하다.
+USTRUCT(BlueprintType)
+struct FOnTakeItemDelegateWrapper
+{
+	GENERATED_BODY()
+
+	FOnTakeItemDelegateWrapper() {}
+
+	FOnTakeItemDelegate ItemDelegate;
+};
+
 class UABCharacterControlData;
 
 UCLASS()
@@ -24,6 +41,7 @@ class ARENABATTLE_API AABCharacterBase
 	: public ACharacter
 	, public IABAnimationAttackInterface
 	, public IABCharacterWidgetInterface
+	, public IABCharacterItemInterface
 {
 	GENERATED_BODY()
 
@@ -100,4 +118,17 @@ protected://UI Widget Section
 	TObjectPtr<class UABWidgetComponent> HpBar;
 
 	virtual void SetupCharacterWidget(class UABUserWidget* InUserWidget) override;
+
+protected://Item Section
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Equipment, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USkeletalMeshComponent> Weapon;
+
+	UPROPERTY()
+	TArray<FOnTakeItemDelegateWrapper> TakeItemActions;
+
+	virtual void TakeItem(class UABItemData* InItemData) override;
+	virtual void DrinkPotion(class UABItemData* InItemData);
+	virtual void EquipWeapon(class UABItemData* InItemData);
+	virtual void ReadScroll(class UABItemData* InItemData);
+	
 };
