@@ -15,6 +15,12 @@ public:
 	// Sets default values for this actor's properties
 	AABItemBox();
 
+	TObjectPtr<class UBoxComponent> GetTrigger() const { return Trigger; }
+
+protected:
+	//컴포넌트가 초기화된 이후 애셋 매니저에서 전체 애셋 목록을 받아온다.
+	virtual void PostInitializeComponents() override;
+
 protected:
 	//캐릭터가 닿으면 작동할 트리거 충돌체
 	UPROPERTY(VisibleAnywhere, Category = Box)

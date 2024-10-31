@@ -3,10 +3,12 @@
 
 #include "Physics/ABCollision.h"
 #include "Interface/ABCharacterItemInterface.h"
+#include "Item/ABItemData.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Engine/AssetManager.h"
 
 // Sets default values
 AABItemBox::AABItemBox()
@@ -44,6 +46,38 @@ AABItemBox::AABItemBox()
 
 		Effect->SetTemplate(EffectRef.Object);
 		Effect->bAutoActivate = false;//자동 실행 x
+	}
+
+}
+
+void AABItemBox::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	UAssetManager& Mgr = UAssetManager::Get();
+
+	//Assets 배열에 "ABItemData"라는 태그를 가진 모든 애셋을 담아줌.
+	TArray<FPrimaryAssetId> Assets;
+	Mgr.GetPrimaryAssetIdList(TEXT("ABItemData"), Assets);
+	
+	if (false == Assets.IsEmpty()) 
+	{
+		//그럼 여기서 랜덤하게 하나 골라서 아이템을 지정해주면 됨
+		int32 RandIdx = FMath::RandRange(0, Assets.Num() - 1);
+
+		//SoftObjectPtr에 AssetPath를 넘겨주면 오브젝트의 주소를 확인 가능.
+		TSoftObjectPtr<UObject> AssetPtr(Mgr.GetPrimaryAssetPath(Assets[RandIdx]));
+		if (AssetPtr.IsPending()) 
+		{
+			AssetPtr.LoadSynchronous();
+		}
+
+		//Item 변수에 등록.
+		Item = Cast<UABItemData>(AssetPtr.Get());
+		ensure(Item);
+	}
+	else {
+		ensure(false == Assets.IsEmpty());
 	}
 
 }
