@@ -18,7 +18,8 @@ public:
 	TObjectPtr<class UBoxComponent> GetTrigger() const { return Trigger; }
 
 protected:
-	//컴포넌트가 초기화된 이후 애셋 매니저에서 전체 애셋 목록을 받아온다.
+	//컴포넌트가 초기화된 이후 애셋 매니저에서 전체 애셋 목록을 받아온 뒤,
+	//랜덤 아이템을 추가한다.
 	virtual void PostInitializeComponents() override;
 
 protected:

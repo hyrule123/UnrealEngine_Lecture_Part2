@@ -304,7 +304,7 @@ void AABCharacterBase::AttackHitCheck()
 	//공격 정보
 	constexpr float AttackRange = 40.f;
 	constexpr float AttackRadius = 50.f;
-	constexpr float AttackDamage = 30.f;
+	constexpr float AttackDamage = 100.f;
 
 	//Sweep 이므로 시작점과 끝점이 필요.
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
