@@ -4,16 +4,36 @@
 
 #include "CoreMinimal.h"
 #include "Character/ABCharacterBase.h"
+#include "Engine/StreamableManager.h"	//TSTreamableHandle
 #include "ABCharacter_NonPlayer.generated.h"
 
 /**
  * 
  */
-UCLASS()
+
+//DefaultArenaBattle.ini 파일을 사용하겠다고 전달
+UCLASS(config=ArenaBattle)
 class ARENABATTLE_API AABCharacter_NonPlayer : public AABCharacterBase
 {
 	GENERATED_BODY()
+public:
+	AABCharacter_NonPlayer();
+
+protected:
+	virtual void PostInitializeComponents() override;
 	
 protected:
 	virtual void SetDead() override;
+
+	//비동기 로딩이 완료되었을 때 호출할 함수
+	void NPCMeshLoadCompleted();
+
+	//config 파일로부터 불러오겠다고 전달
+	//주소를 저장해 놓고, 필요할때 로딩하기 위한 용도
+	UPROPERTY(config)
+	TArray<FSoftObjectPath> NPCMeshes;
+
+
+	//비동기 로딩을 위한 핸들
+	TSharedPtr<FStreamableHandle> NPCMeshHandle;
 };
