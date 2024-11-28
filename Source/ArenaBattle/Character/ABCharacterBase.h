@@ -134,5 +134,4 @@ protected://Item Section
 	virtual void DrinkPotion(class UABItemData* InItemData);
 	virtual void EquipWeapon(class UABItemData* InItemData);
 	virtual void ReadScroll(class UABItemData* InItemData);
-	
 };
