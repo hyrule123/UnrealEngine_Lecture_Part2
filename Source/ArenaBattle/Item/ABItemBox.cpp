@@ -26,8 +26,6 @@ AABItemBox::AABItemBox()
 	//지난번에 생성했던 Arena Battle용 충돌 프로필로 지정
 	Trigger->SetCollisionProfileName(CPROFILE_ABTRIGGER);
 	Trigger->SetBoxExtent(FVector(40.f, 42.f, 30.f));
-	//참고)매크로라서 인텔리센스는 오류를 띄움.
-	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABItemBox::OnOverlapBegin);
 
 	//상자 메쉬는 준비된 메쉬를 사용한다.
 	{
@@ -47,7 +45,6 @@ AABItemBox::AABItemBox()
 		Effect->SetTemplate(EffectRef.Object);
 		Effect->bAutoActivate = false;//자동 실행 x
 	}
-
 }
 
 void AABItemBox::PostInitializeComponents()
@@ -80,6 +77,9 @@ void AABItemBox::PostInitializeComponents()
 		ensure(false == Assets.IsEmpty());
 	}
 
+	//참고)매크로라서 인텔리센스는 오류를 띄움.
+	//SpawnActorDeferred로 변경하면서 델리게이트 등록을 뒤로 미룸
+	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABItemBox::OnOverlapBegin);
 }
 
 void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)

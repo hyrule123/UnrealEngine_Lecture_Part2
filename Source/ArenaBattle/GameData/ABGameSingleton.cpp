@@ -16,9 +16,10 @@ UABGameSingleton::UABGameSingleton()
 
 		//Key-Value 쌍에서 Value만 떼어서 현재 클래스의 변수에 저장한다.
 		TArray<uint8*> ValueArray;
+		CharacterStatTable.Add({});	//Level값과 일치시키기 위함
 		DataTable->GetRowMap().GenerateValueArray(ValueArray);
 		Algo::Transform(ValueArray, CharacterStatTable,
-			[](uint8* Value)
+			[](uint8* Value) ->FABCharacterStat
 			{
 				return *reinterpret_cast<FABCharacterStat*>(Value);
 			}

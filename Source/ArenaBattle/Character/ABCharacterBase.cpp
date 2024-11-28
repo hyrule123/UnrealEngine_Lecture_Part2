@@ -378,6 +378,16 @@ void AABCharacterBase::PlayDeadAnimation()
 	AnimInstance->Montage_Play(DeadMontage, 1.0f);
 }
 
+int32 AABCharacterBase::GetLevel() const
+{
+	return Stat->GetCurrentLevel();
+}
+
+void AABCharacterBase::SetLevel(int32 InNewLevel)
+{
+	Stat->SetLevelStat(InNewLevel);
+}
+
 void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 {
 	//HP바를 설정해줄 것므로 Cast를 통해서 Hp Bar로 변경 후 값 설정

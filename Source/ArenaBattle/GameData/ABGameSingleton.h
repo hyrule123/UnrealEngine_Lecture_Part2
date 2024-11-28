@@ -30,6 +30,10 @@ public:
 	int32 GetCharacterMaxLevel() const { return CharacterMaxLevel; }
 
 private:
-	TArray<FABCharacterStat> CharacterStatTable;
+	UPROPERTY()
 	int32 CharacterMaxLevel;
+
+	UPROPERTY()
+	TArray<FABCharacterStat> CharacterStatTable;
+	
 };

@@ -39,6 +39,10 @@ public:
 	// Sets default values for this actor's properties
 	AABStageGimmick();
 
+public:
+	int32 GetStageNum() const { return CurrentStageNum; }
+	void SetStageNum(int32 NewStageNum) { CurrentStageNum = NewStageNum; }
+
 protected:
 	//초기화되기 이전, 생성 직후 호출.
 	//에디터에서 설정한 클래스 정보도 반영된다.
@@ -121,4 +125,10 @@ protected:
 	void OnRewardTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
 
 	void SpawnRewardBoxes();
+
+//Stage Stat
+protected:
+	//스테이지가 생길떄마다 +1(레벨 지정에 사용
+	UPROPERTY(VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	int32 CurrentStageNum;
 };

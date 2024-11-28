@@ -105,8 +105,16 @@ void AABStageGimmick::OnGateTriggerBeginOverlap(UPrimitiveComponent* OverlappedC
 
 	if (!bResult)
 	{
-		GetWorld()->SpawnActor<AABStageGimmick>(NewLocation, FRotator::ZeroRotator);
+		FTransform NewTransform(NewLocation);
+		AABStageGimmick* NewGimmick = GetWorld()->SpawnActorDeferred<AABStageGimmick>(AABStageGimmick::StaticClass(), NewTransform);
+		if (NewGimmick) 
+		{
+			NewGimmick->SetStageNum(CurrentStageNum + 1);
+			NewGimmick->FinishSpawning(NewTransform);
+		}
 	}
+
+	CurrentStageNum = 0;
 }
 
 void AABStageGimmick::OpenAllGates()
@@ -189,12 +197,16 @@ void AABStageGimmick::OnOpponentDestroyed(AActor* DestroyedActor)
 
 void AABStageGimmick::OnOpponentSpawn()
 {
-	const FVector SpawnLocation = GetActorLocation() + FVector::UpVector * 88.0f;
-	AActor* OpponentActor = GetWorld()->SpawnActor(OpponentClass, &SpawnLocation, &FRotator::ZeroRotator);
-	AABCharacter_NonPlayer* ABOpponentCharacter = Cast<AABCharacter_NonPlayer>(OpponentActor);
+	const FTransform SpawnLocation(GetActorLocation() + FVector::UpVector * 88.0f);
+	AABCharacter_NonPlayer* ABOpponentCharacter = GetWorld()->SpawnActorDeferred<AABCharacter_NonPlayer>(OpponentClass, SpawnLocation);
+
 	if (ABOpponentCharacter)
 	{
 		ABOpponentCharacter->OnDestroyed.AddDynamic(this, &AABStageGimmick::OnOpponentDestroyed);
+		ABOpponentCharacter->SetLevel(CurrentStageNum);
+
+		//SpawnActorDeferred를 호출한 경우 반드시 FinishSpawning을 통해 준비가 완료되었음을 알려주어야 한다.
+		ABOpponentCharacter->FinishSpawning(SpawnLocation);
 	}
 }
 
@@ -224,14 +236,22 @@ void AABStageGimmick::SpawnRewardBoxes()
 {
 	for (const auto& RewardBoxLocation : RewardBoxLocations)
 	{
-		FVector WorldSpawnLocation = GetActorLocation() + RewardBoxLocation.Value + FVector(0.0f, 0.0f, 30.0f);
-		AActor* ItemActor = GetWorld()->SpawnActor(RewardBoxClass, &WorldSpawnLocation, &FRotator::ZeroRotator);
-		AABItemBox* RewardBoxActor = Cast<AABItemBox>(ItemActor);
+		FTransform SpawnTransform(GetActorLocation() + RewardBoxLocation.Value + FVector(0.0f, 0.0f, 30.0f));
+
+		AABItemBox* RewardBoxActor = GetWorld()->SpawnActorDeferred<AABItemBox>(RewardBoxClass, SpawnTransform);
 		if (RewardBoxActor)
 		{
 			RewardBoxActor->Tags.Add(RewardBoxLocation.Key);
 			RewardBoxActor->GetTrigger()->OnComponentBeginOverlap.AddDynamic(this, &AABStageGimmick::OnRewardTriggerBeginOverlap);
 			RewardBoxes.Add(RewardBoxActor);
+		}
+	}
+
+	for (const auto& RewardBox : RewardBoxes) 
+	{
+		if (RewardBox.IsValid()) 
+		{
+			RewardBox.Get()->FinishSpawning(RewardBox.Get()->GetActorTransform());
 		}
 	}
 }

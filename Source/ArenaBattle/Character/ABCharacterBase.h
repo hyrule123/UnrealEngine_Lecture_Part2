@@ -108,8 +108,12 @@ protected://Dead Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	float DeadDestroyDelayTime;
 
+	//Stat Section
+public:
+	int32 GetLevel() const;
+	void SetLevel(int32 InNewLevel);
 
-protected://Stat Section
+protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UABCharacterStatComponent> Stat;
 
