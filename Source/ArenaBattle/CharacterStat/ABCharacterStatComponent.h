@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
+#include "GameData/ABCharacterStat.h"
+
 #include "ABCharacterStatComponent.generated.h"
 
 //델리게이트 선언
@@ -27,19 +30,33 @@ public:
 	FOnHpZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChanged;
 
-	float GetMaxHp() { return MaxHp; }
-	float GetCurrentHp() { return CurrentHp; }
+	void SetLevelStat(int32 InNewLevel);
+	void SetModifierStat(const FABCharacterStat& InModifierStat) {
+		ModifierStat = InModifierStat;
+	}
+	FABCharacterStat GetTotalStat() const {
+		return BaseStat + ModifierStat;
+	}
+	float GetCurrentLevel() const { return CurrentLevel; }
+	float GetCurrentHp() const { return CurrentHp; }
 	float ApplyDamage(float InDamage);
 
 protected:
 	//HP 변경은 반드시 이 함수를 통해서 설정
 	void SetHp(float NewHp);
 
-	//인스턴스 별로 달라질 수 있는 값이므로 VisibleInstanceOnly 를 사용한다.
-	UPROPERTY(VisibleInstanceOnly, Category = Stat)
-	float MaxHp;
-
 	//Transient: 디스크에 저장할 필요가 없는 변수
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float CurrentHp;
+
+	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
+	float CurrentLevel;
+
+	//캐릭터 기본 스탯
+	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	FABCharacterStat BaseStat;
+
+	//장비 스탯
+	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	FABCharacterStat ModifierStat;
 };

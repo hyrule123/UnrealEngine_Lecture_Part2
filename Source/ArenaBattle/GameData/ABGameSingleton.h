@@ -27,6 +27,7 @@ public:
 	FORCEINLINE FABCharacterStat GetCharacterStat(int32 InLevel) const {
 		return (CharacterStatTable.IsValidIndex(InLevel) ? CharacterStatTable[InLevel] : FABCharacterStat{});
 	}
+	int32 GetCharacterMaxLevel() const { return CharacterMaxLevel; }
 
 private:
 	TArray<FABCharacterStat> CharacterStatTable;

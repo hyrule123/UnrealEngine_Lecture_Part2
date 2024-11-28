@@ -21,9 +21,6 @@
 
 DEFINE_LOG_CATEGORY(LogABCharacter);
 
-//콤보 공격속도, 일단 상수값으로 지정한다.
-constexpr const float AttackSpeedRate = 1.f;
-
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
@@ -232,8 +229,9 @@ void AABCharacterBase::ComboActionBegin()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
 	//Montage는 AnimInst에서 재생이 가능하다.
+	const float AttackSpeedRate = Stat->GetTotalStat().AttackSpeed;
 	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
-	AnimInst->Montage_Play(ComboActionMontage);
+	AnimInst->Montage_Play(ComboActionMontage, AttackSpeedRate);
 
 	//끝났을 때 호출할 델리게이트 등록
 	FOnMontageEnded EndDelegate{};
@@ -256,6 +254,8 @@ void AABCharacterBase::SetComboCheckTimer()
 {
 	int32 CurrentComboIdx = CurrentCombo - 1;
 	ensure(ComboActionData && ComboActionData->EffectiveFrameCount.IsValidIndex(CurrentComboIdx));
+
+	const float AttackSpeedRate = Stat->GetTotalStat().AttackSpeed;
 
 	//제한 프레임 장수 / 초당 프레임 시간 / 공속
 	float ComboEffectiveTime = ComboActionData->EffectiveFrameCount[CurrentComboIdx] / ComboActionData->FrameRate / AttackSpeedRate;
@@ -302,9 +302,9 @@ void AABCharacterBase::AttackHitCheck()
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
 
 	//공격 정보
-	constexpr float AttackRange = 40.f;
-	constexpr float AttackRadius = 50.f;
-	constexpr float AttackDamage = 100.f;
+	const float AttackRange = Stat->GetTotalStat().AttackRange;
+	const float AttackRadius = 50.f;
+	const float AttackDamage = Stat->GetTotalStat().Attack;
 
 	//Sweep 이므로 시작점과 끝점이 필요.
 	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
@@ -384,7 +384,7 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 	UABHpBarWidget* HpBarWidget = Cast<UABHpBarWidget>(InUserWidget);
 	if (HpBarWidget)
 	{
-		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		HpBarWidget->SetMaxHp(Stat->GetTotalStat().MaxHp);
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UABHpBarWidget::UpdateHpBar);
 	}

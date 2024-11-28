@@ -3,14 +3,14 @@
 
 #include "CharacterStat/ABCharacterStatComponent.h"
 
+#include "GameData/ABGameSingleton.h"
+
 // Sets default values for this component's properties
 UABCharacterStatComponent::UABCharacterStatComponent()
 {
 	//tick이 필요없는 컴포넌트 이므로 다음의 값을 비활성화 한다.
 	//PrimaryComponentTick.bCanEverTick = true;
-
-	MaxHp = 200.f;
-	SetHp(MaxHp);
+	CurrentLevel = 1;
 }
 
 
@@ -19,7 +19,15 @@ void UABCharacterStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetHp(MaxHp);
+	SetLevelStat(CurrentLevel);
+	SetHp(BaseStat.MaxHp);
+}
+
+void UABCharacterStatComponent::SetLevelStat(int32 InNewLevel)
+{
+	CurrentLevel = FMath::Clamp(InNewLevel, 1, UABGameSingleton::Get().GetCharacterMaxLevel());
+	BaseStat = UABGameSingleton::Get().GetCharacterStat(InNewLevel);
+	check(0.0f < BaseStat.MaxHp);
 }
 
 float UABCharacterStatComponent::ApplyDamage(float InDamage)
@@ -40,7 +48,7 @@ float UABCharacterStatComponent::ApplyDamage(float InDamage)
 
 void UABCharacterStatComponent::SetHp(float NewHp)
 {
-	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, MaxHp);
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, BaseStat.MaxHp);
 
 	//체력 변경 시 등록된 델리게이트 함수를 호출한다.
 	OnHpChanged.Broadcast(CurrentHp);
