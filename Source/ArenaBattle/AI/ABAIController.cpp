@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "AI/ABAIController.h"
+
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
+#include "AI/ABAI.h"
 
 AABAIController::AABAIController()
 {
@@ -21,6 +24,10 @@ void AABAIController::RunAI()
 	UBlackboardComponent* BlackboardPtr = Blackboard.Get();
 
 	if (UseBlackboard(BBAsset, BlackboardPtr)) {
+		//행동트리 실행 전 Blackboard에 스폰된 위치를 전달한다.
+		//GetPawn()을 호출하면 OnPossess에서 받았던 InPawn 주소가 반환된다.(check를 통해 확인했음)
+		Blackboard->SetValueAsVector(BBKEY_HOMEPOS, GetPawn()->GetActorLocation());
+
 		bool result = RunBehaviorTree(BTAsset);
 		ensure(result);
 	}
@@ -39,6 +46,7 @@ void AABAIController::StopAI()
 
 void AABAIController::OnPossess(APawn* InPawn)
 {
+	//상위 클래스에서 InPawn을 현재 클래스에 등록함.
 	Super::OnPossess(InPawn);
-
+	RunAI();
 }
