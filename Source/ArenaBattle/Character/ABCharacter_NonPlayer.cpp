@@ -56,3 +56,23 @@ void AABCharacter_NonPlayer::NPCMeshLoadCompleted()
 	}
 	NPCMeshHandle->ReleaseHandle();
 }
+
+float AABCharacter_NonPlayer::GetAIPatrolRadius()
+{
+	return 0.0f;
+}
+
+float AABCharacter_NonPlayer::GetAIDetectRange()
+{
+	return 0.0f;
+}
+
+float AABCharacter_NonPlayer::GetAIAttackRange()
+{
+	return 0.0f;
+}
+
+float AABCharacter_NonPlayer::GetAITurnSpeed()
+{
+	return 0.0f;
+}

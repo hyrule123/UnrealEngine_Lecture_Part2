@@ -3,6 +3,7 @@
 
 #include "AI/ABAI.h"
 #include "AI/ABAIController.h"
+#include "Interface/ABCharacterAIInterface.h"
 #include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -25,13 +26,24 @@ EBTNodeResult::Type UBTTask_FindPatrolPos::ExecuteTask(UBehaviorTreeComponent& O
 
 	//조종중인 폰이 위치한 월드를 NavMesh에 전달한다.(어디서 길을 찾을지를 지정하는 듯.)
 	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetNavigationSystem(Controlling->GetWorld());
+	if (nullptr == NavSystem)
+	{
+		return EBTNodeResult::Failed;
+	}
+
+	IABCharacterAIInterface* AIPawn = Cast<IABCharacterAIInterface>(Controlling);
+	if (nullptr == AIPawn)
+	{
+		return EBTNodeResult::Failed;
+	}
 
 	//현재 위치를 받아온다.
 	FVector Origin = OwnerComp.GetBlackboardComponent()->GetValueAsVector(BBKEY_HOMEPOS);
+	float PatrolRadius = AIPawn->GetAIPatrolRadius();
 	FNavLocation NextPatrolPos;
 
 	//현재 위치로부터 이동 가능한 범위 내에서 랜덤한 위치를 받아온다.
-	if (NavSystem->GetRandomPointInNavigableRadius(Origin, 500.f, NextPatrolPos))
+	if (NavSystem->GetRandomPointInNavigableRadius(Origin, PatrolRadius, NextPatrolPos))
 	{
 		//true가 반환되면 랜덤 위치를 받아온것이다.
 		//이걸 행동트리의 블랙보드에 전달한다.

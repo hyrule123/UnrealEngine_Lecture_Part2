@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/ABCharacterBase.h"
+#include "Interface/ABCharacterAIInterface.h"
 #include "Engine/StreamableManager.h"	//TSTreamableHandle
 #include "ABCharacter_NonPlayer.generated.h"
 
@@ -13,7 +14,9 @@
 
 //DefaultArenaBattle.ini 파일을 사용하겠다고 전달
 UCLASS(config=ArenaBattle)
-class ARENABATTLE_API AABCharacter_NonPlayer : public AABCharacterBase
+class ARENABATTLE_API AABCharacter_NonPlayer 
+	: public AABCharacterBase
+	, public IABCharacterAIInterface
 {
 	GENERATED_BODY()
 public:
@@ -36,4 +39,11 @@ protected:
 
 	//비동기 로딩을 위한 핸들
 	TSharedPtr<FStreamableHandle> NPCMeshHandle;
+
+//AI Section
+protected:
+	virtual float GetAIPatrolRadius() override;
+	virtual float GetAIDetectRange() override;
+	virtual float GetAIAttackRange() override;
+	virtual float GetAITurnSpeed() override;
 };
