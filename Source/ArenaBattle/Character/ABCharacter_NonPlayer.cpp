@@ -59,12 +59,12 @@ void AABCharacter_NonPlayer::NPCMeshLoadCompleted()
 
 float AABCharacter_NonPlayer::GetAIPatrolRadius()
 {
-	return 0.0f;
+	return 800.f;
 }
 
 float AABCharacter_NonPlayer::GetAIDetectRange()
 {
-	return 0.0f;
+	return 400.f;
 }
 
 float AABCharacter_NonPlayer::GetAIAttackRange()
