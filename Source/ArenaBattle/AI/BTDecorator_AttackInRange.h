@@ -7,7 +7,7 @@
 #include "BTDecorator_AttackInRange.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class ARENABATTLE_API UBTDecorator_AttackInRange : public UBTDecorator
