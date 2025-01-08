@@ -11,6 +11,7 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 	//tick이 필요없는 컴포넌트 이므로 다음의 값을 비활성화 한다.
 	//PrimaryComponentTick.bCanEverTick = true;
 	CurrentLevel = 1;
+	AttackRadius = 50.f;
 }
 
 

@@ -39,6 +39,8 @@ public:
 	}
 	float GetCurrentLevel() const { return CurrentLevel; }
 	float GetCurrentHp() const { return CurrentHp; }
+	float GetAttackRadius() const { return AttackRadius; }
+
 	float ApplyDamage(float InDamage);
 
 protected:
@@ -51,6 +53,9 @@ protected:
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float CurrentLevel;
+
+	UPROPERTY(VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	float AttackRadius;
 
 	//캐릭터 기본 스탯
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))

@@ -303,7 +303,7 @@ void AABCharacterBase::AttackHitCheck()
 
 	//공격 정보
 	const float AttackRange = Stat->GetTotalStat().AttackRange;
-	const float AttackRadius = 50.f;
+	const float AttackRadius = Stat->GetAttackRadius();
 	const float AttackDamage = Stat->GetTotalStat().Attack;
 
 	//Sweep 이므로 시작점과 끝점이 필요.

@@ -3,6 +3,7 @@
 
 #include "Engine/AssetManager.h"
 #include "AI/ABAIController.h"
+#include "CharacterStat/ABCharacterStatComponent.h"
 
 AABCharacter_NonPlayer::AABCharacter_NonPlayer()
 {
@@ -69,7 +70,7 @@ float AABCharacter_NonPlayer::GetAIDetectRange()
 
 float AABCharacter_NonPlayer::GetAIAttackRange()
 {
-	return 0.0f;
+	return Stat->GetTotalStat().AttackRange() + Stat->GetAttackRadius() * 2;
 }
 
 float AABCharacter_NonPlayer::GetAITurnSpeed()
