@@ -75,6 +75,8 @@ protected://Combo Section
 	//DECLARE_DELEGATE_TwoParams( FOnMontageEnded, class UAnimMontage*, bool /*bInterrupted*/) 
 	//이 델리게이트에 맞춘 함수이다.
 	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsproperlyEnded);
+	//NPC 클래스에 콤보 공격이 끝났음을 전달하기 위한 함수
+	virtual void NotifyComboActionEnd() {};
 	void SetComboCheckTimer();	//입력 제한시간 지정
 	void ComboCheck();			//콤보 확인
 

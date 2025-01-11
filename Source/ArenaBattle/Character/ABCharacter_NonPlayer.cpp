@@ -77,3 +77,19 @@ float AABCharacter_NonPlayer::GetAITurnSpeed()
 {
 	return 0.0f;
 }
+
+void AABCharacter_NonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
+{
+	OnAttackFinished = InOnAttackFinished;
+}
+
+void AABCharacter_NonPlayer::AttackByAI()
+{
+	ProcessComboCommand();
+}
+
+void AABCharacter_NonPlayer::NotifyComboActionEnd()
+{
+	Super::NotifyComboActionEnd();
+	OnAttackFinished.ExecuteIfBound();
+}
