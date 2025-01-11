@@ -1,11 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "AI/BTService_Detect.h"
 
-#include "AIController.h"
 #include "Interface/ABCharacterAIInterface.h"
 #include "Physics/ABCollision.h"
 #include "AI/ABAI.h"
+
+#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/OverlapResult.h"
 
 UBTService_Detect::UBTService_Detect()
 {
