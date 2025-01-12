@@ -1,7 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/ABPlayerController.h"
+
+#include "UI/ABHUDWidget.h"
+
+AABPlayerController::AABPlayerController()
+{
+	//클래스 레퍼런스 받아온다
+	static ConstructorHelpers::FClassFinder<UABHUDWidget> ABHUDWidgetRef(TEXT("/Game/ArenaBattle/UI/WBP_ABHUD.WBP_ABHUD_C"));
+	if (ABHUDWidgetRef.Succeeded())
+	{
+		ABHUDWidgetClass = ABHUDWidgetRef.Class;
+	}
+}
 
 void AABPlayerController::BeginPlay()
 {
@@ -12,4 +22,11 @@ void AABPlayerController::BeginPlay()
 
 	//이 값을 SetInputMode에 넘겨준다.
 	SetInputMode(GameOnlyInputMode);
+
+	ABHUDWidget = CreateWidget<UABHUDWidget>(this, ABHUDWidgetClass);
+	//위젯을 성공적으로 생성했으면 화면에 띄워준다
+	if (ABHUDWidget)
+	{
+		ABHUDWidget->AddToViewport();
+	}
 }
