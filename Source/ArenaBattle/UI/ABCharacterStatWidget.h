@@ -17,9 +17,16 @@ class ARENABATTLE_API UABCharacterStatWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-	
+protected:
+	virtual void NativeConstruct() override;
 
 public:
-	//TODO: 선언만 해놓은 상태, 차후 구현 예정
 	void UpdateStatWidget(const FABCharacterStat& BaseStat, const FABCharacterStat& ModifierStat);
+
+private:
+	UPROPERTY()
+	TMap<FName, class UTextBlock*> BaseLookup;
+
+	UPROPERTY()
+	TMap<FName, class UTextBlock*> ModifierLookup;
 };
