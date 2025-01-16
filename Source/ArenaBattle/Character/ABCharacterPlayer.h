@@ -3,17 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Character/ABCharacterBase.h"
+#include "Interface/ABCharacterHUDInterface.h"
+
 #include "InputActionValue.h"	//UInputAction에 필요, EnhancedInput 모듈 추가 필요
 #include "ABCharacterPlayer.generated.h"
-
-
 
 /**
  * 
  */
 UCLASS()
-class ARENABATTLE_API AABCharacterPlayer : public AABCharacterBase
+class ARENABATTLE_API AABCharacterPlayer 
+	: public AABCharacterBase
+	, public IABCharacterHUDInterface
 {
 	GENERATED_BODY()
 public:
@@ -70,4 +73,8 @@ protected:
 	void QuarterMove(const FInputActionValue& Value);
 
 	void Attack();
+
+//UI Section
+protected:
+	virtual void SetupHUDWidget(class UABHUDWidget* InHUDWidget) override;
 };

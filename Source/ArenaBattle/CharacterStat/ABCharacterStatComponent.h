@@ -12,6 +12,7 @@
 //델리게이트 선언
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStatChangedDelegate, const FABCharacterStat& /*BaseStat*/, const FABCharacterStat& /*ModifierStat*/);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ARENABATTLE_API UABCharacterStatComponent : public UActorComponent
@@ -23,20 +24,34 @@ public:
 	UABCharacterStatComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	/**
+	 * Initializes the component.  Occurs at level startup or actor spawn. This is before BeginPlay (Actor or Component).
+	 * All Components in the level will be Initialized on load before any Actor/Component gets BeginPlay
+	 * Requires component to be registered, and bWantsInitializeComponent to be true.
+	 */
+	virtual void InitializeComponent() override;
+	// Called when the game starts: 내부 코드를 InitializeComponent로 옮김
+	//virtual void BeginPlay() override;
 
 public:
 	FOnHpZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChanged;
+	FOnStatChangedDelegate OnStatChanged;
 
 	void SetLevelStat(int32 InNewLevel);
-	void SetModifierStat(const FABCharacterStat& InModifierStat) {
-		ModifierStat = InModifierStat;
+	void SetBaseStat(const FABCharacterStat& InBaseStat) { 
+		BaseStat = InBaseStat; 
+		OnStatChanged.Broadcast(GetBaseStat(), GetModifierStat());
 	}
-	FABCharacterStat GetTotalStat() const {
-		return BaseStat + ModifierStat;
+	void SetModifierStat(const FABCharacterStat& InModifierStat) { 
+		ModifierStat = InModifierStat; 
+		OnStatChanged.Broadcast(GetBaseStat(), GetModifierStat());
 	}
+
+	const FABCharacterStat& GetBaseStat() const { return BaseStat; }
+	const FABCharacterStat& GetModifierStat() const { return ModifierStat; }
+	FABCharacterStat GetTotalStat() const { return BaseStat + ModifierStat; }
+
 	float GetCurrentLevel() const { return CurrentLevel; }
 	float GetCurrentHp() const { return CurrentHp; }
 	float GetAttackRadius() const { return AttackRadius; }

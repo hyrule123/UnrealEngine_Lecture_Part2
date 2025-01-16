@@ -12,13 +12,15 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 	//PrimaryComponentTick.bCanEverTick = true;
 	CurrentLevel = 1;
 	AttackRadius = 50.f;
+
+	//InitializeComponent() 함수를 호출하고 싶으면 이 변수를 true로 변경해주어야 한다.
+	bWantsInitializeComponent = true;
 }
 
 
-// Called when the game starts
-void UABCharacterStatComponent::BeginPlay()
+void UABCharacterStatComponent::InitializeComponent()
 {
-	Super::BeginPlay();
+	Super::InitializeComponent();
 
 	SetLevelStat(CurrentLevel);
 	SetHp(BaseStat.MaxHp);
@@ -27,7 +29,7 @@ void UABCharacterStatComponent::BeginPlay()
 void UABCharacterStatComponent::SetLevelStat(int32 InNewLevel)
 {
 	CurrentLevel = FMath::Clamp(InNewLevel, 1, UABGameSingleton::Get().GetCharacterMaxLevel());
-	BaseStat = UABGameSingleton::Get().GetCharacterStat(InNewLevel);
+	SetBaseStat(UABGameSingleton::Get().GetCharacterStat(InNewLevel));
 	check(0.0f < BaseStat.MaxHp);
 }
 
