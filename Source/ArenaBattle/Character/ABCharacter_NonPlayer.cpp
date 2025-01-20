@@ -30,6 +30,12 @@ void AABCharacter_NonPlayer::SetDead()
 {
 	Super::SetDead();
 
+	AABAIController* AIController = Cast<AABAIController>(GetController());
+	if (AIController)
+	{
+		AIController->StopAI();
+	}
+
 	FTimerHandle DeadTimer{};
 	GetWorld()->GetTimerManager().SetTimer(
 		DeadTimer,

@@ -22,6 +22,10 @@ class ARENABATTLE_API AABCharacterPlayer
 public:
 	AABCharacterPlayer();
 
+	virtual void BeginPlay() override;
+	virtual void SetDead() override;
+
+public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 //Player Control Section
