@@ -13,6 +13,15 @@
 /**
  * 
  */
+
+UENUM()
+enum class ECameraViewMode : uint32
+{
+	Shoulder,
+	Quarter,
+	END
+};
+
 UCLASS()
 class ARENABATTLE_API AABCharacterPlayer 
 	: public AABCharacterBase
@@ -33,6 +42,15 @@ protected:
 	void SwitchCameraViewMode();
 	
 	virtual void SetCharacterControlData(const class UABCharacterControlData* ControlData) override;
+
+	void SetCameraViewMode(ECameraViewMode Mode);
+	ECameraViewMode GetCameraViewMode() { return CurCamViewMode; }
+
+	UPROPERTY(EditDefaultsOnly, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
+	ECameraViewMode CurCamViewMode;
+
+	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UABCharacterControlData>> CameraModeSettings;
 
 //Camera Section
 protected:
@@ -75,6 +93,8 @@ protected:
 	void ShoulderLook(const FInputActionValue& Value);
 
 	void QuarterMove(const FInputActionValue& Value);
+
+	ECameraViewMode CurrentCamMode;
 
 	void Attack();
 

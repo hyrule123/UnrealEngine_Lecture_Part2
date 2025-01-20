@@ -101,24 +101,6 @@ AABCharacterBase::AABCharacterBase()
 			}
 		}
 	}
-
-	{//Camera
-		CurCamViewMode = ECameraViewMode::Shoulder;
-
-		CameraModeSettings.SetNum((int32)ECameraViewMode::END);
-
-		{
-			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder'"));
-			check(ShoulderViewSettingRef.Succeeded());
-			CameraModeSettings[(int32)ECameraViewMode::Shoulder] = ShoulderViewSettingRef.Object;
-		}
-
-		{
-			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuarterViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Quarter.ABC_Quarter'"));
-			check(QuarterViewSettingRef.Succeeded());
-			CameraModeSettings[(int32)ECameraViewMode::Quarter] = QuarterViewSettingRef.Object;
-		}
-	}
 	
 	{//Stat Component
 		Stat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("Stat"));
@@ -180,8 +162,10 @@ void AABCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetCameraViewMode(CurCamViewMode);
+	
 }
+
+
 
 void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* ControlData)
 {
@@ -192,12 +176,7 @@ void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* Co
 	GetCharacterMovement()->RotationRate = ControlData->RotationRate;
 }
 
-void AABCharacterBase::SetCameraViewMode(ECameraViewMode Mode)
-{
-	check(CameraModeSettings.IsValidIndex((int32)Mode) && CameraModeSettings[(int32)Mode]);
-	CurCamViewMode = Mode;
-	SetCharacterControlData(CameraModeSettings[(int32)Mode]);
-}
+
 
 void AABCharacterBase::ProcessComboCommand()
 {

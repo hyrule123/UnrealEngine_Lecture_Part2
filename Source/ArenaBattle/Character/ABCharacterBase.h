@@ -12,13 +12,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogABCharacter, Log, All);
 
-UENUM()
-enum class ECameraViewMode : uint32
-{
-	Shoulder,
-	Quarter,
-	END
-};
+
 
 //아이템 습득시 처리할 Delegate
 DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UABItemData* /*InItemData*/);
@@ -53,18 +47,6 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void SetCharacterControlData(const UABCharacterControlData* ControlData);
-
-
-protected://Camera Section
-	void SetCameraViewMode(ECameraViewMode Mode);
-	ECameraViewMode GetCameraViewMode() { return CurCamViewMode; }
-
-	UPROPERTY(EditDefaultsOnly, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
-	ECameraViewMode CurCamViewMode;
-
-	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<UABCharacterControlData>> CameraModeSettings;
-
 
 protected://Combo Section
 	//등록된 Attack 몽타주를 재생

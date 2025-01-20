@@ -13,6 +13,24 @@
 
 AABCharacterPlayer::AABCharacterPlayer()
 {
+	{//Camera
+		CurCamViewMode = ECameraViewMode::Shoulder;
+
+		CameraModeSettings.SetNum((int32)ECameraViewMode::END);
+
+		{
+			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder'"));
+			check(ShoulderViewSettingRef.Succeeded());
+			CameraModeSettings[(int32)ECameraViewMode::Shoulder] = ShoulderViewSettingRef.Object;
+		}
+
+		{
+			static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuarterViewSettingRef(TEXT("/Script/ArenaBattle.ABCharacterControlData'/Game/ArenaBattle/CharacterControl/ABC_Quarter.ABC_Quarter'"));
+			check(QuarterViewSettingRef.Succeeded());
+			CameraModeSettings[(int32)ECameraViewMode::Quarter] = QuarterViewSettingRef.Object;
+		}
+	}
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("ShoulderCameraBoom"));
 	//루트컴포넌트에 붙인다
 	CameraBoom->SetupAttachment(RootComponent);
@@ -77,6 +95,8 @@ void AABCharacterPlayer::BeginPlay()
 	{
 		EnableInput(PlayerController);
 	}
+
+	SetCameraViewMode(CurCamViewMode);
 }
 
 void AABCharacterPlayer::SetDead()
@@ -114,16 +134,14 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AABCharacterPlayer::SwitchCameraViewMode()
 {
-	ECameraViewMode ViewMode = GetCameraViewMode();
-	if (ViewMode == ECameraViewMode::Shoulder)
+	if (CurrentCamMode == ECameraViewMode::Shoulder)
 	{
-		ViewMode = ECameraViewMode::Quarter;
+		SetCameraViewMode(ECameraViewMode::Quarter);
 	}
 	else
 	{
-		ViewMode = ECameraViewMode::Shoulder;
+		SetCameraViewMode(ECameraViewMode::Shoulder);
 	}
-	SetCameraViewMode(ViewMode);
 }
 
 
@@ -157,6 +175,15 @@ void AABCharacterPlayer::SetCharacterControlData(const UABCharacterControlData* 
 		//0: 우선순위 -> 입력 충돌이 있을경우 우선순위 가 높은 입력을 우선 처리
 		SubSystem->AddMappingContext(ControlData->InputMappingContext, 0);
 	}
+}
+
+void AABCharacterPlayer::SetCameraViewMode(ECameraViewMode Mode)
+{
+	check(CameraModeSettings.IsValidIndex((int32)Mode));
+	check(CameraModeSettings[(int32)Mode]);
+
+	CurCamViewMode = Mode;
+	SetCharacterControlData(CameraModeSettings[(int32)Mode]);
 }
 
 void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
