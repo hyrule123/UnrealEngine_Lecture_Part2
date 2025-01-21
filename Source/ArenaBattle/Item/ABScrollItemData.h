@@ -4,19 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Item/ABItemData.h"
+
 #include "GameData/ABCharacterStat.h"
-#include "ABWeaponItemData.generated.h"
+
+#include "ABScrollItemData.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ARENABATTLE_API UABWeaponItemData : public UABItemData
+class ARENABATTLE_API UABScrollItemData : public UABItemData
 {
 	GENERATED_BODY()
 	
 public:
-	UABWeaponItemData();
+	UABScrollItemData();
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
@@ -24,10 +26,9 @@ public:
 		//첫번째 인자는 같으나 두번쨰 인자는 부모 클래스와 다르므로 각자 다르게 오버라이드 해주어야 한다.
 		return FPrimaryAssetId(TEXT("ABItemData"), GetFName());
 	}
+	const FABCharacterStat& GetAddStats() const { return AddStats; }
 
-	UPROPERTY(EditAnywhere, Category = Weapon)
-	TSoftObjectPtr<USkeletalMesh> WeaponMesh;
-
+public:
 	UPROPERTY(EditAnywhere, Category = Stat)
-	FABCharacterStat ModifierStat;
+	FABCharacterStat AddStats;
 };

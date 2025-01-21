@@ -19,12 +19,16 @@ enum class EItemType : uint8
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class ARENABATTLE_API UABItemData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
 public:
+	UABItemData();
+
+	virtual void PostInitProperties() override;
+
 	//UPrimaryDataAsset 클래스에 정의된 Asset Id를 반환해주는 함수
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override 
 	{
@@ -32,6 +36,6 @@ public:
 		return FPrimaryAssetId(TEXT("ABItemData"), GetFName());
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Type)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = ItemType)
 	EItemType Type;
 };

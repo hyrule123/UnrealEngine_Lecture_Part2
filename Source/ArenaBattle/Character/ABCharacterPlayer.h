@@ -94,8 +94,6 @@ protected:
 
 	void QuarterMove(const FInputActionValue& Value);
 
-	ECameraViewMode CurrentCamMode;
-
 	void Attack();
 
 //UI Section

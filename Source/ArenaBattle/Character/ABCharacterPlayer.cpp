@@ -14,7 +14,7 @@
 AABCharacterPlayer::AABCharacterPlayer()
 {
 	{//Camera
-		CurCamViewMode = ECameraViewMode::Shoulder;
+		CurCamViewMode = ECameraViewMode::Quarter;
 
 		CameraModeSettings.SetNum((int32)ECameraViewMode::END);
 
@@ -134,7 +134,7 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AABCharacterPlayer::SwitchCameraViewMode()
 {
-	if (CurrentCamMode == ECameraViewMode::Shoulder)
+	if (CurCamViewMode == ECameraViewMode::Shoulder)
 	{
 		SetCameraViewMode(ECameraViewMode::Quarter);
 	}

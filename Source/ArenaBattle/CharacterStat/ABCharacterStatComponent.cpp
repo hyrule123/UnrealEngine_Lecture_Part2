@@ -49,6 +49,15 @@ float UABCharacterStatComponent::ApplyDamage(float InDamage)
 	return ActualDamage;
 }
 
+void UABCharacterStatComponent::HealHp(float InHealAmount)
+{
+	if (0 < InHealAmount)
+	{
+		CurrentHp = FMath::Clamp(CurrentHp + InHealAmount, 0.f, GetMaxHp());
+		OnHpChanged.Broadcast(CurrentHp);
+	}
+}
+
 void UABCharacterStatComponent::SetHp(float NewHp)
 {
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, BaseStat.MaxHp);

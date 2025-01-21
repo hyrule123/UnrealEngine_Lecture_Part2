@@ -54,9 +54,11 @@ public:
 
 	float GetCurrentLevel() const { return CurrentLevel; }
 	float GetCurrentHp() const { return CurrentHp; }
+	float GetMaxHp() const { return BaseStat.MaxHp + ModifierStat.MaxHp; }
 	float GetAttackRadius() const { return AttackRadius; }
 
 	float ApplyDamage(float InDamage);
+	void HealHp(float InHealAmount);
 
 protected:
 	//HP 변경은 반드시 이 함수를 통해서 설정

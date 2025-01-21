@@ -7,12 +7,11 @@
 #include "Interface/ABAnimationAttackInterface.h"
 #include "Interface/ABCharacterWidgetInterface.h"
 #include "Interface/ABCharacterItemInterface.h"
+#include "GameData/ABCharacterStat.h"
 
 #include "ABCharacterBase.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogABCharacter, Log, All);
-
-
 
 //아이템 습득시 처리할 Delegate
 DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UABItemData* /*InItemData*/);
@@ -45,7 +44,6 @@ public:
 
 protected:
 	virtual void PostInitializeComponents() override;
-	virtual void BeginPlay() override;
 	virtual void SetCharacterControlData(const UABCharacterControlData* ControlData);
 
 protected://Combo Section
@@ -96,6 +94,7 @@ protected://Dead Section
 public:
 	int32 GetLevel() const;
 	void SetLevel(int32 InNewLevel);
+	void ApplyStat(const FABCharacterStat& BaseStat, const FABCharacterStat& ModifierStat);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))

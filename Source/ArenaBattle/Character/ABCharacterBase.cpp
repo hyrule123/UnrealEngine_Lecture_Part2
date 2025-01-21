@@ -9,8 +9,7 @@
 #include "UI/ABWidgetComponent.h"
 #include "UI/ABHpBarWidget.h"
 
-#include "Item/ABItemData.h"
-#include "Item/ABWeaponItemData.h"
+#include "Item/ABItems.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -156,16 +155,8 @@ void AABCharacterBase::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	Stat->OnHpZero.AddUObject(this, &AABCharacterBase::SetDead);
+	Stat->OnStatChanged.AddUObject(this, &AABCharacterBase::ApplyStat);
 }
-
-void AABCharacterBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	
-}
-
-
 
 void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* ControlData)
 {
@@ -175,8 +166,6 @@ void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* Co
 	GetCharacterMovement()->bUseControllerDesiredRotation = ControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = ControlData->RotationRate;
 }
-
-
 
 void AABCharacterBase::ProcessComboCommand()
 {
@@ -368,6 +357,12 @@ void AABCharacterBase::SetLevel(int32 InNewLevel)
 	Stat->SetLevelStat(InNewLevel);
 }
 
+void AABCharacterBase::ApplyStat(const FABCharacterStat& BaseStat, const FABCharacterStat& ModifierStat)
+{
+	FABCharacterStat TotalStat = BaseStat + ModifierStat;
+	GetCharacterMovement()->MaxWalkSpeed = TotalStat.MovementSpeed;
+}
+
 void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 {
 	//HP바를 설정해줄 것므로 Cast를 통해서 Hp Bar로 변경 후 값 설정
@@ -390,7 +385,11 @@ void AABCharacterBase::TakeItem(UABItemData* InItemData)
 
 void AABCharacterBase::DrinkPotion(UABItemData* InItemData)
 {
-	UE_LOG(LogABCharacter, Log, TEXT("Drink Potion"));
+	UABPotionItemData* PotionItemData = Cast<UABPotionItemData>(InItemData);
+	if (PotionItemData)
+	{
+		Stat->HealHp(PotionItemData->GetHealAmount());
+	}
 }
 
 void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
@@ -411,5 +410,10 @@ void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
 
 void AABCharacterBase::ReadScroll(UABItemData* InItemData)
 {
-	UE_LOG(LogABCharacter, Log, TEXT("Read Scroll"));
+	UABScrollItemData* ScrollItemData = Cast<UABScrollItemData>(InItemData);
+	if (ScrollItemData)
+	{
+		FABCharacterStat NewStat = Stat->GetBaseStat() + ScrollItemData->GetAddStats();
+		Stat->SetBaseStat(NewStat);
+	}
 }
