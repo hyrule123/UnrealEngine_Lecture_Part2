@@ -10,8 +10,8 @@
 #include "ABCharacterStatComponent.generated.h"
 
 //델리게이트 선언
-DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
+DECLARE_MULTICAST_DELEGATE(FOnCurHpZeroDelegate);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurHpChangedDelegate, float /*CurrentHp*/);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStatChangedDelegate, const FABCharacterStat& /*BaseStat*/, const FABCharacterStat& /*ModifierStat*/);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -34,8 +34,8 @@ protected:
 	//virtual void BeginPlay() override;
 
 public:
-	FOnHpZeroDelegate OnHpZero;
-	FOnHpChangedDelegate OnHpChanged;
+	FOnCurHpZeroDelegate OnCurHpZero;
+	FOnCurHpChangedDelegate OnCurHpChanged;
 	FOnStatChangedDelegate OnStatChanged;
 
 	void SetLevelStat(int32 InNewLevel);

@@ -233,6 +233,6 @@ void AABCharacterPlayer::SetupHUDWidget(UABHUDWidget* InHUDWidget)
 
 		//델리게이트에 UI 업데이트 함수를 바인딩
 		Stat->OnStatChanged.AddUObject(InHUDWidget, &UABHUDWidget::UpdateStatWidget);
-		Stat->OnHpChanged.AddUObject(InHUDWidget, &UABHUDWidget::UpdateHpBar);
+		Stat->OnCurHpChanged.AddUObject(InHUDWidget, &UABHUDWidget::UpdateHpBar);
 	}
 }

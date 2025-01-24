@@ -13,14 +13,13 @@ UABHUDWidget::UABHUDWidget(const FObjectInitializer& ObjectInitializer)
 void UABHUDWidget::UpdateStatWidget(const FABCharacterStat& BaseStat, const FABCharacterStat& ModifierStat)
 {
 	FABCharacterStat TotalStat = BaseStat + ModifierStat;
-	HpBar->SetMaxHp(TotalStat.MaxHp);
-	
+	HpBar->SetMaxHp(BaseStat, ModifierStat);
 	CharacterStatWidget->UpdateStatWidget(BaseStat, ModifierStat);
 }
 
 void UABHUDWidget::UpdateHpBar(float NewCurrentHp)
 {
-	HpBar->UpdateHpBar(NewCurrentHp);
+	HpBar->SetCurHp(NewCurrentHp);
 }
 
 void UABHUDWidget::NativeConstruct()

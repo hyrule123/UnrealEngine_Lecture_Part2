@@ -154,7 +154,7 @@ void AABCharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	Stat->OnHpZero.AddUObject(this, &AABCharacterBase::SetDead);
+	Stat->OnCurHpZero.AddUObject(this, &AABCharacterBase::SetDead);
 	Stat->OnStatChanged.AddUObject(this, &AABCharacterBase::ApplyStat);
 }
 
@@ -369,9 +369,10 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 	UABHpBarWidget* HpBarWidget = Cast<UABHpBarWidget>(InUserWidget);
 	if (HpBarWidget)
 	{
-		HpBarWidget->SetMaxHp(Stat->GetTotalStat().MaxHp);
-		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
-		Stat->OnHpChanged.AddUObject(HpBarWidget, &UABHpBarWidget::UpdateHpBar);
+		HpBarWidget->SetMaxHp(Stat->GetBaseStat(), Stat->GetModifierStat());
+		HpBarWidget->SetCurHp(Stat->GetCurrentHp());
+		Stat->OnCurHpChanged.AddUObject(HpBarWidget, &UABHpBarWidget::SetCurHp);
+		Stat->OnStatChanged.AddUObject(HpBarWidget, &UABHpBarWidget::SetMaxHp);
 	}
 }
 

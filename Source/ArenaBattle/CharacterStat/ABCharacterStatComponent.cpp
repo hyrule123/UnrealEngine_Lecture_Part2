@@ -43,7 +43,7 @@ float UABCharacterStatComponent::ApplyDamage(float InDamage)
 	//FLOAT_EPSILON이랑 비슷한 의미로 사용하는듯
 	if (CurrentHp <= KINDA_SMALL_NUMBER) 
 	{
-		OnHpZero.Broadcast();
+		OnCurHpZero.Broadcast();
 	}
 
 	return ActualDamage;
@@ -54,7 +54,7 @@ void UABCharacterStatComponent::HealHp(float InHealAmount)
 	if (0 < InHealAmount)
 	{
 		CurrentHp = FMath::Clamp(CurrentHp + InHealAmount, 0.f, GetMaxHp());
-		OnHpChanged.Broadcast(CurrentHp);
+		OnCurHpChanged.Broadcast(CurrentHp);
 	}
 }
 
@@ -63,5 +63,5 @@ void UABCharacterStatComponent::SetHp(float NewHp)
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, BaseStat.MaxHp);
 
 	//체력 변경 시 등록된 델리게이트 함수를 호출한다.
-	OnHpChanged.Broadcast(CurrentHp);
+	OnCurHpChanged.Broadcast(CurrentHp);
 }
