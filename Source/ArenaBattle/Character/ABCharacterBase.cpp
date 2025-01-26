@@ -320,7 +320,7 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	//Stat에 받은 데미지를 적용
-	return Stat->ApplyDamage(DamageAmount);;
+	return Stat->ApplyDamage(DamageAmount);
 }
 
 void AABCharacterBase::SetDead()

@@ -46,7 +46,7 @@ void UABHpBarWidget::SetMaxHp(const FABCharacterStat& BaseStat, const FABCharact
 void UABHpBarWidget::SetCurHp(float InCurHp)
 {
 	ensure(0 <= InCurHp);
-	CurHp = FMath::Clamp(0, MaxHp, InCurHp); 
+	CurHp = FMath::Clamp(InCurHp, 0.0f, MaxHp);
 	UpdateHpBar(); 
 	UpdateHpText();
 }

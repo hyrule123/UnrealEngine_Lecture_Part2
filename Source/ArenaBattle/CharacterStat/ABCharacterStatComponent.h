@@ -62,7 +62,7 @@ public:
 
 protected:
 	//HP 변경은 반드시 이 함수를 통해서 설정
-	void SetHp(float NewHp);
+	void SetCurHp(float NewHp);
 
 	//Transient: 디스크에 저장할 필요가 없는 변수
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)

@@ -23,7 +23,7 @@ void UABCharacterStatComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	SetLevelStat(CurrentLevel);
-	SetHp(BaseStat.MaxHp);
+	SetCurHp(BaseStat.MaxHp);
 }
 
 void UABCharacterStatComponent::SetLevelStat(int32 InNewLevel)
@@ -38,7 +38,7 @@ float UABCharacterStatComponent::ApplyDamage(float InDamage)
 	const float PrevHp = CurrentHp;
 	const float ActualDamage = FMath::Clamp<float>(InDamage, 0, InDamage);
 
-	SetHp(PrevHp - ActualDamage);
+	SetCurHp(PrevHp - ActualDamage);
 
 	//FLOAT_EPSILON이랑 비슷한 의미로 사용하는듯
 	if (CurrentHp <= KINDA_SMALL_NUMBER) 
@@ -58,7 +58,7 @@ void UABCharacterStatComponent::HealHp(float InHealAmount)
 	}
 }
 
-void UABCharacterStatComponent::SetHp(float NewHp)
+void UABCharacterStatComponent::SetCurHp(float NewHp)
 {
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, BaseStat.MaxHp);
 
