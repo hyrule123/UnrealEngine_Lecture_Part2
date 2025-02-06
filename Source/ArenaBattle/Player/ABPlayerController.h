@@ -18,13 +18,36 @@ public:
 public:
 	virtual void BeginPlay() override;
 
+	/*
+	K2: 블루프린트의 전신 격인 Kismet 기능에 사용하던 접두사
+	아래 함수와 같이 써야 하기 때문에 접두사만 붙여서 다른 함수를 만들어주어야 하기 때문에
+	K2_라는 접두사를 관습적으로 사용한다.
+	또한 매크로를 통해서 BluePrint에서 구현할 함수라는 것을 인식하기 때문에
+	굳이 정의부를 만들지 않아도 문제가 발생하지 않는다.
+	*/
+	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnScoreChangedCpp"))
+	void K2_OnScoreChanged(int32 NewScore);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameClearCpp"))
+	void K2_OnGameClear();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameOverCpp"))
+	void K2_OnGameOver();
+
+	void ScoreChanged(int32 NewScore);
+	void GameClear();
+	void GameOver();
+
 	//HUD Section
 protected:
+	//Blueprint로 생성하는 것으로 변경하였음
+	/*
 	//참고: TSubclassOf: 컴파일타임 + 런타임 타입안정성 보장받는 클래스 정보 보관소
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
 	TSubclassOf<class UABHUDWidget> ABHUDWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<class UABHUDWidget> ABHUDWidget;
+	*/
 };
 

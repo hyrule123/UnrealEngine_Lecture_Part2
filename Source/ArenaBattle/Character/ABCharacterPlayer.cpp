@@ -4,9 +4,11 @@
 #include "Character/ABCharacterControlData.h"
 #include "UI/ABHUDWidget.h"
 #include "CharacterStat/ABCharacterStatComponent.h"
+#include "Interface/ABGameInterface.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/GameModeBase.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -107,6 +109,12 @@ void AABCharacterPlayer::SetDead()
 	if (PlayerController)
 	{
 		DisableInput(PlayerController);
+
+		IABGameInterface* ABGameMode = Cast<IABGameInterface>(GetWorld()->GetAuthGameMode());
+		if (ABGameMode)
+		{
+			ABGameMode->OnPlayerDead();
+		}
 	}
 }
 
