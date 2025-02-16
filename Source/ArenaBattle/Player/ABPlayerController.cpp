@@ -36,9 +36,9 @@ void AABPlayerController::BeginPlay()
 	*/
 }
 
-void AABPlayerController::ScoreChanged(int32 NewScore)
+void AABPlayerController::ScoreChanged(int32 CurrentScore)
 {
-	K2_OnScoreChanged(NewScore);
+	K2_OnScoreChanged(CurrentScore);
 }
 
 void AABPlayerController::GameClear()

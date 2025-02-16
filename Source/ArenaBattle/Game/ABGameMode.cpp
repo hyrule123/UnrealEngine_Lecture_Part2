@@ -19,24 +19,24 @@ AABGameMode::AABGameMode()
 	check(Controller.Succeeded());
 	PlayerControllerClass = Controller.Class;
 
-	ClearScore = 3;
-	CurrentScore = 0;
+	Score_ClearCondition = 2;
+	Score_Current = 0;
 	bIsCleared = false;
 }
 
 void AABGameMode::OnPlayerScoreChanged(int32 NewPlayerScore)
 {
-	CurrentScore = NewPlayerScore;
+	Score_Current = NewPlayerScore;
 
 	//현재는 '싱글 게임' 이기 때문에 플레이어 컨트롤러 중 '첫 번째' 컨트롤러만 받아오면 된다.
 	AABPlayerController* ABPlayerController = Cast<AABPlayerController>(GetWorld()->GetFirstPlayerController());
 	if (ABPlayerController)
 	{
-		ABPlayerController->ScoreChanged(CurrentScore);
+		ABPlayerController->ScoreChanged(Score_Current);
 	}
 
 
-	if (CurrentScore >= ClearScore)
+	if (Score_Current >= Score_ClearCondition)
 	{
 		bIsCleared = true;
 

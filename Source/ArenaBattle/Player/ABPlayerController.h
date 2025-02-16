@@ -20,13 +20,14 @@ public:
 
 	/*
 	K2: 블루프린트의 전신 격인 Kismet 기능에 사용하던 접두사
-	아래 함수와 같이 써야 하기 때문에 접두사만 붙여서 다른 함수를 만들어주어야 하기 때문에
+	접두사만 붙여서 다른 함수를 만들어주어야 하기 때문에
+	예전에 사용하던 시스템인 Kismet에서 따온
 	K2_라는 접두사를 관습적으로 사용한다.
 	또한 매크로를 통해서 BluePrint에서 구현할 함수라는 것을 인식하기 때문에
 	굳이 정의부를 만들지 않아도 문제가 발생하지 않는다.
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnScoreChangedCpp"))
-	void K2_OnScoreChanged(int32 NewScore);
+	void K2_OnScoreChanged(int32 CurrentScore);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameClearCpp"))
 	void K2_OnGameClear();
@@ -34,7 +35,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameOverCpp"))
 	void K2_OnGameOver();
 
-	void ScoreChanged(int32 NewScore);
+	void ScoreChanged(int32 CurrentScore);
 	void GameClear();
 	void GameOver();
 

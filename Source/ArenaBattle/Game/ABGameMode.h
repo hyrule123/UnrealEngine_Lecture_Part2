@@ -28,14 +28,14 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Game)
-	int32 ClearScore;
+	int32 Score_ClearCondition;
 
 	/*
 	사실 이 값은 '플레이어'의 점수이기 때문에
 	PlayerState에서 보관하는 것이 더 바람직하다.
 	*/
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Game)
-	int32 CurrentScore;
+	int32 Score_Current;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Game)
 	uint8 bIsCleared : 1;
