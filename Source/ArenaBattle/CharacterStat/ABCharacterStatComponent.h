@@ -30,6 +30,7 @@ protected:
 	 * Requires component to be registered, and bWantsInitializeComponent to be true.
 	 */
 	virtual void InitializeComponent() override;
+	
 	// Called when the game starts: 내부 코드를 InitializeComponent로 옮김
 	//virtual void BeginPlay() override;
 

@@ -34,6 +34,8 @@ void AABPlayerController::BeginPlay()
 		ABHUDWidget->AddToViewport();
 	}
 	*/
+
+	//SaveGameInstance = Cast<UABSaveGame>(GamePlaySta)
 }
 
 void AABPlayerController::ScoreChanged(int32 CurrentScore)

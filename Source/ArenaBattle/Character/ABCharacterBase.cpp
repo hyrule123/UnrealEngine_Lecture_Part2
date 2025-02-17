@@ -156,6 +156,9 @@ void AABCharacterBase::PostInitializeComponents()
 
 	Stat->OnCurHpZero.AddUObject(this, &AABCharacterBase::SetDead);
 	Stat->OnStatChanged.AddUObject(this, &AABCharacterBase::ApplyStat);
+
+	//추가 스탯 초기화와 동시에 등록한 OnStatChanged 델리게이트 함수들 호출하기 위함
+	Stat->SetModifierStat({});
 }
 
 void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* ControlData)

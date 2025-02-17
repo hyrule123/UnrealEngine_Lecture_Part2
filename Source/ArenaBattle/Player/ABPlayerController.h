@@ -39,7 +39,7 @@ public:
 	void GameClear();
 	void GameOver();
 
-	//HUD Section
+//HUD Section
 protected:
 	//Blueprint로 생성하는 것으로 변경하였음
 	/*
@@ -50,5 +50,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
 	TObjectPtr<class UABHUDWidget> ABHUDWidget;
 	*/
+
+//SaveGame Section
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SaveGame")
+	TObjectPtr<class UABSaveGame> SaveGameInstance;
 };
 
