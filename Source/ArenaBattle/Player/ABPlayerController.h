@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "ABPlayerController.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogABPlayerController, Log, All);
+
 /**
  * 
  */
@@ -34,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameOverCpp"))
 	void K2_OnGameOver();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameRetryCountChangedCpp"))
+	void K2_OnGameRetryCountChanged(int32 NewRetryCount);
 
 	void ScoreChanged(int32 CurrentScore);
 	void GameClear();

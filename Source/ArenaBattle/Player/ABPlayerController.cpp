@@ -2,6 +2,10 @@
 #include "Player/ABPlayerController.h"
 
 #include "UI/ABHUDWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/ABSaveGame.h"
+
+DEFINE_LOG_CATEGORY(LogABPlayerController);
 
 AABPlayerController::AABPlayerController()
 {
@@ -35,7 +39,17 @@ void AABPlayerController::BeginPlay()
 	}
 	*/
 
-	//SaveGameInstance = Cast<UABSaveGame>(GamePlaySta)
+	//플레이어 컨트롤러처럼, 자신의 인덱스에 해당하는 번호에서 저장 데이터를 불러올 수 있다.
+	//
+	SaveGameInstance = Cast<UABSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("Player0"), 0));
+
+	if (nullptr == SaveGameInstance)
+	{
+		SaveGameInstance = NewObject<UABSaveGame>();
+		SaveGameInstance->RetryCount = 0;
+	}
+
+	K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
 }
 
 void AABPlayerController::ScoreChanged(int32 CurrentScore)
@@ -45,10 +59,23 @@ void AABPlayerController::ScoreChanged(int32 CurrentScore)
 
 void AABPlayerController::GameClear()
 {
+	//클리어 시에는 Retry Count를 초기화
+	SaveGameInstance->RetryCount = 0;
+
 	K2_OnGameClear();
 }
 
 void AABPlayerController::GameOver()
 {
+	//게임 데이터를 저장
+	check(SaveGameInstance);
+	SaveGameInstance->RetryCount++;
+	UE_LOG(LogABPlayerController, Log, TEXT("GAME SAVING..."));
+	if (false == UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("Player0"), 0))
+	{
+		UE_LOG(LogABPlayerController, Error, TEXT("FAILED TO SAVE GAME"));
+	}
+	
+	K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
 	K2_OnGameOver();
 }
