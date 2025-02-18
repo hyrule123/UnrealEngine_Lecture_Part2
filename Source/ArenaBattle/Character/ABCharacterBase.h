@@ -79,8 +79,12 @@ protected://Combo Section
 	//AActor 클래스
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+//Evade Section
+protected:
+	void EvadeIfPossible();
 
-protected://Dead Section
+//Dead Section
+protected:
 	virtual void SetDead();
 	void PlayDeadAnimation();
 
@@ -90,7 +94,8 @@ protected://Dead Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	float DeadDestroyDelayTime;
 
-	//Stat Section
+
+//Stat Section
 public:
 	int32 GetLevel() const;
 	void SetLevel(int32 InNewLevel);

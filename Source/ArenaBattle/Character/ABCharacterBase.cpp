@@ -326,6 +326,11 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	return Stat->ApplyDamage(DamageAmount);
 }
 
+void AABCharacterBase::EvadeIfPossible()
+{
+	int a = 3;
+}
+
 void AABCharacterBase::SetDead()
 {
 	//일단 이동 제한을 걸어준다.

@@ -85,6 +85,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EvadeAction;
 	//////////////////////////////////////////////////
 
 	//매핑할 함수
@@ -94,6 +97,7 @@ protected:
 	void QuarterMove(const FInputActionValue& Value);
 
 	void Attack();
+	void Evade();
 
 //UI Section
 protected:

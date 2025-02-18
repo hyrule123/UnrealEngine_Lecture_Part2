@@ -86,6 +86,12 @@ AABCharacterPlayer::AABCharacterPlayer()
 		check(AttackActionRef.Succeeded());
 		AttackAction = AttackActionRef.Object;
 	}
+
+	{
+		static ConstructorHelpers::FObjectFinder<UInputAction> EvadeActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/Actions/IA_Evade.IA_Evade'"));
+		check(EvadeActionRef.Succeeded());
+		EvadeAction = EvadeActionRef.Object;
+	}
 }
 
 void AABCharacterPlayer::BeginPlay()
@@ -138,6 +144,8 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(SwitchViewAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::SwitchCameraViewMode);
 
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Attack);
+
+	EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Evade);
 }
 
 void AABCharacterPlayer::SwitchCameraViewMode()
@@ -230,6 +238,11 @@ void AABCharacterPlayer::QuarterMove(const FInputActionValue& Value)
 void AABCharacterPlayer::Attack()
 {
 	ProcessComboCommand();
+}
+
+void AABCharacterPlayer::Evade()
+{
+	EvadeIfPossible();
 }
 
 void AABCharacterPlayer::SetupHUDWidget(UABHUDWidget* InHUDWidget)

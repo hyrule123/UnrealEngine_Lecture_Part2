@@ -24,7 +24,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = Name)
 	uint8 MaxComboCount;
 
-	//
 	UPROPERTY(EditAnywhere, Category = Name)
 	float FrameRate;
 
