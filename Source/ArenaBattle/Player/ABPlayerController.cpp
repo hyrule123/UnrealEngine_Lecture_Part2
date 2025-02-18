@@ -17,6 +17,9 @@ AABPlayerController::AABPlayerController()
 		ABHUDWidgetClass = ABHUDWidgetRef.Class;
 	}
 	*/
+
+	//플레이어 컨트롤러처럼, 자신의 인덱스에 해당하는 번호에서 저장 데이터를 불러올 수 있다.
+
 }
 
 void AABPlayerController::BeginPlay()
@@ -39,8 +42,6 @@ void AABPlayerController::BeginPlay()
 	}
 	*/
 
-	//플레이어 컨트롤러처럼, 자신의 인덱스에 해당하는 번호에서 저장 데이터를 불러올 수 있다.
-	//
 	SaveGameInstance = Cast<UABSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("Player0"), 0));
 
 	if (nullptr == SaveGameInstance)
@@ -48,7 +49,13 @@ void AABPlayerController::BeginPlay()
 		SaveGameInstance = NewObject<UABSaveGame>();
 		SaveGameInstance->RetryCount = 0;
 	}
+	
+	K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
+}
 
+void AABPlayerController::AddRetryCount()
+{
+	SaveGameInstance->RetryCount++;
 	K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
 }
 
@@ -61,7 +68,6 @@ void AABPlayerController::GameClear()
 {
 	//클리어 시에는 Retry Count를 초기화
 	SaveGameInstance->RetryCount = 0;
-
 	K2_OnGameClear();
 }
 
@@ -76,6 +82,7 @@ void AABPlayerController::GameOver()
 		UE_LOG(LogABPlayerController, Error, TEXT("FAILED TO SAVE GAME"));
 	}
 	
-	K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
+	//버튼 눌렀을떄 실행되도록(BP) 변경
+	//K2_OnGameRetryCountChanged(SaveGameInstance->RetryCount);
 	K2_OnGameOver();
 }

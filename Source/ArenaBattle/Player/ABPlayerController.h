@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = Game, Meta = (DisplayName = "OnGameRetryCountChangedCpp"))
 	void K2_OnGameRetryCountChanged(int32 NewRetryCount);
 
+	UFUNCTION(BlueprintCallable, Category = Game, Meta = (DisplayName = "AddRetryCountCpp"))
+	void AddRetryCount();
+
 	void ScoreChanged(int32 CurrentScore);
 	void GameClear();
 	void GameOver();

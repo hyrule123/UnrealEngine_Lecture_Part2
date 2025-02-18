@@ -35,5 +35,4 @@ private:
 
 	UPROPERTY()
 	TArray<FABCharacterStat> CharacterStatTable;
-	
 };
