@@ -29,6 +29,8 @@ struct FOnTakeItemDelegateWrapper
 
 class UABCharacterControlData;
 
+constexpr int32 IdleState = 0, EvadeState = -1;
+
 UCLASS()
 class ARENABATTLE_API AABCharacterBase 
 	: public ACharacter
@@ -45,6 +47,7 @@ public:
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void SetCharacterControlData(const UABCharacterControlData* ControlData);
+	virtual void Tick(float DeltaSeconds) override;
 
 protected://Combo Section
 	//등록된 Attack 몽타주를 재생
@@ -69,7 +72,7 @@ protected://Combo Section
 	TObjectPtr<class UABComboActionData> ComboActionData;
 
 	//internal montage process values
-	int32 CurrentCombo = 0;	//현재 콤보 단계 수(0 == 콤보 중 아님)
+	int32 CurrentState = 0;	//현재 콤보 단계 수(0 == 콤보 중 아님)
 	FTimerHandle ComboTimerHandle;	//시간이 지나면 함수를 호출해주는 핸들
 	bool HasNextComboCommand = false;	//제한시간 안에(선입력 타임) 다음 콤보 입력이 들어왔는지
 
@@ -82,6 +85,8 @@ protected://Combo Section
 //Evade Section
 protected:
 	void EvadeIfPossible();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Evade")
+	FVector EvadeDir;
 
 //Dead Section
 protected:
@@ -93,7 +98,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, Meta = (AllowPrivateAccess = "true"))
 	float DeadDestroyDelayTime;
-
 
 //Stat Section
 public:

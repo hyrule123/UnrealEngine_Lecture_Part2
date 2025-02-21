@@ -31,6 +31,7 @@ public:
 	AABCharacterPlayer();
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetDead() override;
 
 public:
@@ -88,6 +89,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> EvadeAction;
+
+	bool bIsMoveActionPressed = false;
+	FVector LastInputDirection;
 	//////////////////////////////////////////////////
 
 	//매핑할 함수
@@ -97,7 +101,7 @@ protected:
 	void QuarterMove(const FInputActionValue& Value);
 
 	void Attack();
-	void Evade();
+	void HandleEvadeInputAction();
 
 //UI Section
 protected:

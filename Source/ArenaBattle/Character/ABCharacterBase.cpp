@@ -148,6 +148,9 @@ AABCharacterBase::AABCharacterBase()
 
 	//인피니티 메시에 지정된 소켓 이름에 붙여 준다.
 	Weapon->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
+
+	//Evade 
+	EvadeDir = FVector::BackwardVector;
 }
 
 void AABCharacterBase::PostInitializeComponents()
@@ -170,10 +173,22 @@ void AABCharacterBase::SetCharacterControlData(const UABCharacterControlData* Co
 	GetCharacterMovement()->RotationRate = ControlData->RotationRate;
 }
 
+void AABCharacterBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	//회피 방향은 반대편
+	EvadeDir = GetMovementComponent()->GetForwardVector();
+	EvadeDir.Z = 0.0f;
+	EvadeDir = -EvadeDir;
+}
+
 void AABCharacterBase::ProcessComboCommand()
 {
+	//콤보 진행을 할 수 없는 상활일 때는 진행하지 않음
+	if (CurrentState < 0) { return; }
 	//콤보 값이 0일때, 즉 콤보공격이 아직 시작되지 않았을 때
-	if (CurrentCombo == 0)
+	if (CurrentState == 0)
 	{
 		ComboActionBegin();
 		return;
@@ -194,7 +209,7 @@ void AABCharacterBase::ProcessComboCommand()
 
 void AABCharacterBase::ComboActionBegin()
 {
-	CurrentCombo = 1;
+	CurrentState = 1;
 
 	//공격 중에는 움직임을 제한한다.
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
@@ -216,15 +231,15 @@ void AABCharacterBase::ComboActionBegin()
 
 void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsproperlyEnded)
 {
-	ensure(CurrentCombo != 0);
-	CurrentCombo = 0;
+	ensure(CurrentState != 0);
+	CurrentState = 0;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	NotifyComboActionEnd();
 }
 
 void AABCharacterBase::SetComboCheckTimer()
 {
-	int32 CurrentComboIdx = CurrentCombo - 1;
+	int32 CurrentComboIdx = CurrentState - 1;
 	ensure(ComboActionData && ComboActionData->EffectiveFrameCount.IsValidIndex(CurrentComboIdx));
 
 	const float AttackSpeedRate = Stat->GetTotalStat().AttackSpeed;
@@ -252,10 +267,10 @@ void AABCharacterBase::ComboCheck()
 		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
 
 		//최대 콤보 범위 안으로 제한을 걸어준다.
-		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+		CurrentState = FMath::Clamp(CurrentState + 1, 1, ComboActionData->MaxComboCount);
 
 		//몽타주에 저장된 Section 이름은 FName 형태이다.
-		FName NextSectionName = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
+		FName NextSectionName = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentState);
 		AnimInst->Montage_JumpToSection(NextSectionName, ComboActionMontage);
 
 		//다음 콤보까지 제한시간을 새로 등록한다.
@@ -328,8 +343,14 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 void AABCharacterBase::EvadeIfPossible()
 {
-	int a = 3;
+	if (CurrentState == EvadeState) { return; }
+
+	if (CurrentState == 0)
+	{
+		
+	}
 }
+
 
 void AABCharacterBase::SetDead()
 {

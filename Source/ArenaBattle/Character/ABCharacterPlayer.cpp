@@ -107,6 +107,17 @@ void AABCharacterPlayer::BeginPlay()
 	SetCameraViewMode(CurCamViewMode);
 }
 
+void AABCharacterPlayer::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	if (bIsMoveActionPressed)
+	{
+		EvadeDir = LastInputDirection;
+		bIsMoveActionPressed = false;
+	}
+}
+
 void AABCharacterPlayer::SetDead()
 {
 	Super::SetDead();
@@ -145,7 +156,7 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Attack);
 
-	EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Evade);
+	EnhancedInputComponent->BindAction(EvadeAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::HandleEvadeInputAction);
 }
 
 void AABCharacterPlayer::SwitchCameraViewMode()
@@ -159,8 +170,6 @@ void AABCharacterPlayer::SwitchCameraViewMode()
 		SetCameraViewMode(ECameraViewMode::Shoulder);
 	}
 }
-
-
 
 void AABCharacterPlayer::SetCharacterControlData(const UABCharacterControlData* ControlData)
 {
@@ -211,12 +220,16 @@ void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 	const FRotator YawRotation = { 0, Rotation.Yaw, 0 };
 
 	//좌우값만 남은 회전행렬에서 X축 방향을 가져와서 해당 방향으로 이동
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FRotationMatrix RotMat = { YawRotation };
+	const FVector ForwardDirection = RotMat.GetUnitAxis(EAxis::X);
 	AddMovementInput(ForwardDirection, MovementVector.X);
 
-	//
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector RightDirection = RotMat.GetUnitAxis(EAxis::Y);
 	AddMovementInput(RightDirection, MovementVector.Y);
+
+	bIsMoveActionPressed = true;
+	LastInputDirection = ForwardDirection + RightDirection;
+	LastInputDirection.Normalize();
 }
 
 void AABCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
@@ -233,15 +246,23 @@ void AABCharacterPlayer::QuarterMove(const FInputActionValue& Value)
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	AddMovementInput(FVector::ForwardVector, MovementVector.X);
 	AddMovementInput(FVector::RightVector, MovementVector.Y);
-}
+
+	bIsMoveActionPressed = true;
+	LastInputDirection.X = MovementVector.X;
+	LastInputDirection.Y = MovementVector.Y;
+	LastInputDirection.Z = 0.0f;
+};
+
 
 void AABCharacterPlayer::Attack()
 {
 	ProcessComboCommand();
 }
 
-void AABCharacterPlayer::Evade()
+void AABCharacterPlayer::HandleEvadeInputAction()
 {
+
+
 	EvadeIfPossible();
 }
 
