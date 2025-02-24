@@ -151,6 +151,8 @@ AABCharacterBase::AABCharacterBase()
 
 	//Evade 
 	EvadeDir = FVector::BackwardVector;
+	EvadeCoolTime = 1.0f;
+	EvadeCastingTime = 0.1f;
 }
 
 void AABCharacterBase::PostInitializeComponents()
@@ -344,9 +346,21 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void AABCharacterBase::EvadeIfPossible()
 {
 	if (CurrentState == EvadeState) { return; }
+	if (GetWorld()->GetTimerManager().IsTimerActive(EvadeCoolTimer)) { return; }
 
-	if (CurrentState == 0)
+	if (CurrentState == IdleState)
 	{
+		CurrentState = EvadeState;
+		GetWorld()->GetTimerManager().SetTimer(EvadeCoolTimer, EvadeCoolTime, false);
+		GetWorld()->GetTimerManager().SetTimer(EvadeCastTimer, 
+			[this]()
+			{
+				CurrentState = IdleState;
+			}
+			, EvadeCastingTime, false);
+
+		FVector Forward = GetActorForwardVector();
+		LaunchCharacter(Forward * 1000.0f, false, false);
 		
 	}
 }

@@ -35,16 +35,23 @@ protected:
 	float GroundSpeed;
 
 	//bool 타입은 사이즈가 명확하지 않으므로 bool 대신 uint8을 사용. 대신 :1로 1비트만 사용하도록 제한한다.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsIdle : 1;	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsFalling : 1;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsJumping : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsEvading : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpThreshold;	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float MoveThreshold;
+
+//Montages
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UAnimMontage> EvadeMontage;
 };

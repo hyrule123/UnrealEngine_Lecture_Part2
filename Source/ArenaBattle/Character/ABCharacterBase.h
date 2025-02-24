@@ -44,6 +44,9 @@ public:
 	// Sets default values for this character's properties
 	AABCharacterBase();
 
+	//ABAnimInstance 클래스에서 참조
+	bool IsEvading() const { return CurrentState == EvadeState; }
+
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void SetCharacterControlData(const UABCharacterControlData* ControlData);
@@ -85,8 +88,18 @@ protected://Combo Section
 //Evade Section
 protected:
 	void EvadeIfPossible();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Evade")
 	FVector EvadeDir;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Evade")
+	float EvadeCoolTime;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Evade")
+	float EvadeCastingTime;
+
+	FTimerHandle EvadeCastTimer;
+	FTimerHandle EvadeCoolTimer;
 
 //Dead Section
 protected:
