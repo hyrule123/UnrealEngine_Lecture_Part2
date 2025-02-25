@@ -261,8 +261,6 @@ void AABCharacterPlayer::Attack()
 
 void AABCharacterPlayer::HandleEvadeInputAction()
 {
-
-
 	EvadeIfPossible();
 }
 

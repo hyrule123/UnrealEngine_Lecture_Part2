@@ -30,6 +30,13 @@ struct FOnTakeItemDelegateWrapper
 class UABCharacterControlData;
 
 constexpr int32 IdleState = 0, EvadeState = -1;
+UENUM()
+enum class FNextCommand : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Attack UMETA(DisplayName = "Attack"),
+	Evade UMETA(DisplayName = "Dodge")
+};
 
 UCLASS()
 class ARENABATTLE_API AABCharacterBase 
@@ -77,7 +84,8 @@ protected://Combo Section
 	//internal montage process values
 	int32 CurrentState = 0;	//현재 콤보 단계 수(0 == 콤보 중 아님)
 	FTimerHandle ComboTimerHandle;	//시간이 지나면 함수를 호출해주는 핸들
-	bool HasNextComboCommand = false;	//제한시간 안에(선입력 타임) 다음 콤보 입력이 들어왔는지
+
+	FNextCommand NextCommand; //선입력된 다음 명령
 
 	//IABAnimationAttackInterface
 	virtual void AttackHitCheck() override;
@@ -88,7 +96,10 @@ protected://Combo Section
 //Evade Section
 protected:
 	void EvadeIfPossible();
+private: 
+	void EvadeNow();
 
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Evade")
 	FVector EvadeDir;
 

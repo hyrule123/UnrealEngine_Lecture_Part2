@@ -152,7 +152,7 @@ AABCharacterBase::AABCharacterBase()
 	//Evade 
 	EvadeDir = FVector::BackwardVector;
 	EvadeCoolTime = 1.0f;
-	EvadeCastingTime = 0.1f;
+	EvadeCastingTime = 0.2f;
 }
 
 void AABCharacterBase::PostInitializeComponents()
@@ -199,13 +199,16 @@ void AABCharacterBase::ProcessComboCommand()
 	//타이머가 켜져 있다면 입력을 통해 후속 콤보를 이어나갈 수 있다.
 	if (ComboTimerHandle.IsValid())
 	{
-		HasNextComboCommand = true;
+		NextCommand = FNextCommand::Attack;
 	}
 
 	//타이머가 꺼져있으면 콤보 진행 중단
 	else
 	{
-		HasNextComboCommand = false;
+		if (NextCommand == FNextCommand::Attack)
+		{
+			NextCommand = FNextCommand::None;
+		}
 	}
 }
 
@@ -233,7 +236,7 @@ void AABCharacterBase::ComboActionBegin()
 
 void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsproperlyEnded)
 {
-	ensure(CurrentState != 0);
+	if (CurrentState < 1) { return; }
 	CurrentState = 0;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	NotifyComboActionEnd();
@@ -261,10 +264,12 @@ void AABCharacterBase::ComboCheck()
 	//타이머 OFF
 	ComboTimerHandle.Invalidate();
 
+	if (NextCommand == FNextCommand::None) { return; }
+
 	//시간 안에 다음 콤보 커맨드가 들어왔으면 다음 콤보 몽타주로 넘어간다.
-	if (HasNextComboCommand)
+	if (NextCommand == FNextCommand::Attack)
 	{
-		HasNextComboCommand = false;
+		NextCommand = FNextCommand::None;
 
 		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
 
@@ -277,6 +282,10 @@ void AABCharacterBase::ComboCheck()
 
 		//다음 콤보까지 제한시간을 새로 등록한다.
 		SetComboCheckTimer();
+	}
+	else if (NextCommand == FNextCommand::Evade)
+	{
+		EvadeNow();
 	}
 }
 
@@ -350,21 +359,50 @@ void AABCharacterBase::EvadeIfPossible()
 
 	if (CurrentState == IdleState)
 	{
-		CurrentState = EvadeState;
-		GetWorld()->GetTimerManager().SetTimer(EvadeCoolTimer, EvadeCoolTime, false);
-		GetWorld()->GetTimerManager().SetTimer(EvadeCastTimer, 
-			[this]()
-			{
-				CurrentState = IdleState;
-			}
-			, EvadeCastingTime, false);
+		EvadeNow();
+	}
 
-		FVector Forward = GetActorForwardVector();
-		LaunchCharacter(Forward * 1000.0f, false, false);
-		
+	if (IdleState < CurrentState)
+	{
+		//선입력 가능한 시간일 경우 선입력
+		if (ComboTimerHandle.IsValid())
+		{
+			NextCommand = FNextCommand::Evade;
+		}
+		//선입력 시간이 아닐 경우, 회피 가능한 시간이므로 회피
+		else
+		{
+			EvadeNow();
+		}
 	}
 }
 
+void AABCharacterBase::EvadeNow()
+{
+	if (IdleState < CurrentState)
+	{
+		//몽타주 재생 시 기본 액션을 덮어쓰므로 몽타주 재생을 중단
+		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+		AnimInst->Montage_Stop(0.0f, ComboActionMontage);
+
+		//콤보액션 종료 함수를 명시적으로 호출
+		ComboActionEnd(ComboActionMontage, false);
+	}
+
+	CurrentState = EvadeState;
+	GetWorld()->GetTimerManager().SetTimer(EvadeCoolTimer, EvadeCoolTime, false);
+	GetWorld()->GetTimerManager().SetTimer(EvadeCastTimer,
+		[this]()
+		{
+			CurrentState = IdleState;
+		}
+	, EvadeCastingTime, false);
+
+	GetMovementComponent()->StopMovementImmediately();
+
+	//XY 좌표 오버라이드
+	LaunchCharacter(EvadeDir * 1000.0f, true, false);
+}
 
 void AABCharacterBase::SetDead()
 {

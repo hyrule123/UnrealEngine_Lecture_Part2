@@ -45,10 +45,4 @@ void UABAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsJumping = bIsFalling & (Velocity.Z > JumpThreshold);
 		//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("Velocity: %f, %f, %f"), Velocity.X, Velocity.Y, Velocity.Z)); 
 	}
-
-	if (bIsEvading)
-	{
-		//PlayAnimMontage(EvadeMontage, 1.0f, TEXT("EvadeMotionStart"));
-		//Montage_loop(EvadeMontage);
-	}
 }
