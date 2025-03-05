@@ -23,7 +23,7 @@ DEFINE_LOG_CATEGORY(LogABCharacter);
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	{//Pawn Setting
@@ -155,6 +155,16 @@ AABCharacterBase::AABCharacterBase()
 	EvadeCastingTime = 0.2f;
 }
 
+bool AABCharacterBase::TryReserveAction(ECharacterAction InAction)
+{
+	if (ReserveActionTimer.IsValid())
+	{
+		ReservedAction = InAction;
+		return true;
+	}
+	return false;
+}
+
 void AABCharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -189,27 +199,14 @@ void AABCharacterBase::ProcessComboCommand()
 {
 	//콤보 진행을 할 수 없는 상활일 때는 진행하지 않음
 	if (CurrentState < 0) { return; }
-	//콤보 값이 0일때, 즉 콤보공격이 아직 시작되지 않았을 때
+	//Idle 상태일 때에서만 콤보 공격을 진행할 수 있음.
 	if (CurrentState == 0)
 	{
 		ComboActionBegin();
 		return;
 	}
 
-	//타이머가 켜져 있다면 입력을 통해 후속 콤보를 이어나갈 수 있다.
-	if (ComboTimerHandle.IsValid())
-	{
-		NextCommand = FNextCommand::Attack;
-	}
-
-	//타이머가 꺼져있으면 콤보 진행 중단
-	else
-	{
-		if (NextCommand == FNextCommand::Attack)
-		{
-			NextCommand = FNextCommand::None;
-		}
-	}
+	TryReserveAction(ECharacterAction::Attack);
 }
 
 void AABCharacterBase::ComboActionBegin()
@@ -230,19 +227,19 @@ void AABCharacterBase::ComboActionBegin()
 	AnimInst->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
 	
 	//타이머 재시작
-	ComboTimerHandle.Invalidate();
-	SetComboCheckTimer();
+	ReserveActionTimer.Invalidate();
+	SetReserveActionTimer_ComboAttack();
 }
 
 void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsproperlyEnded)
 {
 	if (CurrentState < 1) { return; }
-	CurrentState = 0;
+	CurrentState = IdleState;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	NotifyComboActionEnd();
 }
 
-void AABCharacterBase::SetComboCheckTimer()
+void AABCharacterBase::SetReserveActionTimer_ComboAttack()
 {
 	int32 CurrentComboIdx = CurrentState - 1;
 	ensure(ComboActionData && ComboActionData->EffectiveFrameCount.IsValidIndex(CurrentComboIdx));
@@ -255,21 +252,20 @@ void AABCharacterBase::SetComboCheckTimer()
 	if (0.f < ComboEffectiveTime)
 	{
 		//타이머 핸들을 활용하여 ComboEffectiveTime 시간 후에 호출되는 함수를 등록
-		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &AABCharacterBase::ComboCheck, ComboEffectiveTime, false);
+		GetWorld()->GetTimerManager().SetTimer(ReserveActionTimer, this, &AABCharacterBase::CheckReservedAction, ComboEffectiveTime, false);
 	}
 }
 
-void AABCharacterBase::ComboCheck()
+void AABCharacterBase::CheckReservedAction()
 {
 	//타이머 OFF
-	ComboTimerHandle.Invalidate();
-
-	if (NextCommand == FNextCommand::None) { return; }
+	ReserveActionTimer.Invalidate();
+	if (ReservedAction == ECharacterAction::None) { return; }
 
 	//시간 안에 다음 콤보 커맨드가 들어왔으면 다음 콤보 몽타주로 넘어간다.
-	if (NextCommand == FNextCommand::Attack)
+	if (ReservedAction == ECharacterAction::Attack)
 	{
-		NextCommand = FNextCommand::None;
+		ReservedAction = ECharacterAction::None;
 
 		UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
 
@@ -281,12 +277,14 @@ void AABCharacterBase::ComboCheck()
 		AnimInst->Montage_JumpToSection(NextSectionName, ComboActionMontage);
 
 		//다음 콤보까지 제한시간을 새로 등록한다.
-		SetComboCheckTimer();
+		SetReserveActionTimer_ComboAttack();
 	}
-	else if (NextCommand == FNextCommand::Evade)
+	else if (ReservedAction == ECharacterAction::Evade)
 	{
 		EvadeNow();
 	}
+
+	ReservedAction = ECharacterAction::None;
 }
 
 //애니메이션 노티파이 클래스 AnimNotify_AttackHitCheck 클래스에서 호출됨
@@ -365,9 +363,9 @@ void AABCharacterBase::EvadeIfPossible()
 	if (IdleState < CurrentState)
 	{
 		//선입력 가능한 시간일 경우 선입력
-		if (ComboTimerHandle.IsValid())
+		if (ReserveActionTimer.IsValid())
 		{
-			NextCommand = FNextCommand::Evade;
+			ReservedAction = ECharacterAction::Evade;
 		}
 		//선입력 시간이 아닐 경우, 회피 가능한 시간이므로 회피
 		else

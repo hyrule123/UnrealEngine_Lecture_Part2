@@ -36,7 +36,6 @@ protected:
 	UPROPERTY(config)
 	TArray<FSoftObjectPath> NPCMeshes;
 
-
 	//비동기 로딩을 위한 핸들
 	TSharedPtr<FStreamableHandle> NPCMeshHandle;
 
@@ -49,6 +48,7 @@ protected:
 
 	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
 	virtual void AttackByAI() override;
+	virtual void AttackStop() override;
 
 	FAICharacterAttackFinished OnAttackFinished;
 

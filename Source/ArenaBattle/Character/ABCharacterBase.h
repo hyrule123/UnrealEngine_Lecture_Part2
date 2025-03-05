@@ -13,6 +13,8 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogABCharacter, Log, All);
 
+DECLARE_DELEGATE(FActionHandleDelegate);
+
 //아이템 습득시 처리할 Delegate
 DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UABItemData* /*InItemData*/);
 
@@ -28,10 +30,9 @@ struct FOnTakeItemDelegateWrapper
 };
 
 class UABCharacterControlData;
-
 constexpr int32 IdleState = 0, EvadeState = -1;
 UENUM()
-enum class FNextCommand : uint8
+enum class ECharacterAction : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Attack UMETA(DisplayName = "Attack"),
@@ -53,6 +54,8 @@ public:
 
 	//ABAnimInstance 클래스에서 참조
 	bool IsEvading() const { return CurrentState == EvadeState; }
+	ECharacterAction GetReservedAction() const { return ReservedAction; }
+	bool TryReserveAction(ECharacterAction InAction);
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -70,8 +73,8 @@ protected://Combo Section
 	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsproperlyEnded);
 	//NPC 클래스에 콤보 공격이 끝났음을 전달하기 위한 함수
 	virtual void NotifyComboActionEnd() {};
-	void SetComboCheckTimer();	//입력 제한시간 지정
-	void ComboCheck();			//콤보 확인
+	void SetReserveActionTimer_ComboAttack();
+	void CheckReservedAction();			//선입력 처리
 
 	//콤보 몽타주 정보, 블루프린트에서 지정할 예정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, Meta = (AllowPrivateAccess = "true"))
@@ -83,9 +86,8 @@ protected://Combo Section
 
 	//internal montage process values
 	int32 CurrentState = 0;	//현재 콤보 단계 수(0 == 콤보 중 아님)
-	FTimerHandle ComboTimerHandle;	//시간이 지나면 함수를 호출해주는 핸들
-
-	FNextCommand NextCommand; //선입력된 다음 명령
+	FTimerHandle ReserveActionTimer;	//선입력 입력 가능 시간
+	ECharacterAction ReservedAction; //선입력된 다음 명령
 
 	//IABAnimationAttackInterface
 	virtual void AttackHitCheck() override;

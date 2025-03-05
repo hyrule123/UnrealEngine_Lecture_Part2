@@ -15,6 +15,8 @@ UBTDecorator_AttackInRange::UBTDecorator_AttackInRange()
 
 bool UBTDecorator_AttackInRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
+	UE_LOG(LogTemp, Log, TEXT("Checked!"));
+
 	bool bResult = Super::CalculateRawConditionValue(OwnerComp, NodeMemory);
 
 	//이 AI가 조종중인 폰 주소 확인

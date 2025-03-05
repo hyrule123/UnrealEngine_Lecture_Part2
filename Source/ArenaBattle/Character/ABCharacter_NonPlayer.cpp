@@ -94,6 +94,14 @@ void AABCharacter_NonPlayer::AttackByAI()
 	ProcessComboCommand();
 }
 
+void AABCharacter_NonPlayer::AttackStop()
+{	
+	if (GetReservedAction() == ECharacterAction::Attack)
+	{
+		TryReserveAction(ECharacterAction::None);
+	}
+}
+
 void AABCharacter_NonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
