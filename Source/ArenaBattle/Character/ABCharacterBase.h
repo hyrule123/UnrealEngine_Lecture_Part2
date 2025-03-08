@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
+#include "Character/ABCharacter_Common.h"
 #include "Interface/ABAnimationAttackInterface.h"
 #include "Interface/ABCharacterWidgetInterface.h"
 #include "Interface/ABCharacterItemInterface.h"
@@ -12,8 +13,6 @@
 #include "ABCharacterBase.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogABCharacter, Log, All);
-
-DECLARE_DELEGATE(FActionHandleDelegate);
 
 //아이템 습득시 처리할 Delegate
 DECLARE_DELEGATE_OneParam(FOnTakeItemDelegate, class UABItemData* /*InItemData*/);
@@ -31,13 +30,7 @@ struct FOnTakeItemDelegateWrapper
 
 class UABCharacterControlData;
 constexpr int32 IdleState = 0, EvadeState = -1;
-UENUM()
-enum class ECharacterAction : uint8
-{
-	None UMETA(DisplayName = "None"),
-	Attack UMETA(DisplayName = "Attack"),
-	Evade UMETA(DisplayName = "Dodge")
-};
+
 
 UCLASS()
 class ARENABATTLE_API AABCharacterBase 
@@ -75,6 +68,7 @@ protected://Combo Section
 	virtual void NotifyComboActionEnd() {};
 	void SetReserveActionTimer_ComboAttack();
 	void CheckReservedAction();			//선입력 처리
+	virtual void NotifyReserveTimeEnd() {};
 
 	//콤보 몽타주 정보, 블루프린트에서 지정할 예정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, Meta = (AllowPrivateAccess = "true"))

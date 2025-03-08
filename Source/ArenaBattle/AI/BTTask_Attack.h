@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+
+#include "Character/ABCharacter_Common.h"
+
 #include "BTTask_Attack.generated.h"
 
 /**
@@ -20,6 +23,5 @@ public:
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
-	//BTTask는 Tick은 없음, 대신 InProgress 상태에서 작동하는 TickTask 함수가 있다.
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

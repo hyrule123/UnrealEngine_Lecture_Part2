@@ -10,6 +10,7 @@
 UBTTask_Attack::UBTTask_Attack()
 {
 	bNotifyTick = true;
+	bTickIntervals = true;
 }
 
 EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -32,8 +33,27 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
+	////선입력시간이 종료되면 실행될 함수
+	//FOnReserveTimeEndDelegate OnReserveTimeFinished;
+	//OnReserveTimeFinished.BindLambda(
+	//	[&](ECharacterAction NextAction)->void
+	//	{
+	//		UE_LOG(LogTemp, Log, TEXT("OnReserveTimeEnd"));
+	//		
+	//		//만약 다음 액션으로 Attack이 정해졌을 경우
+	//		//공격 범위 내에 있는지 다시 확인을 해야 한다
+	//		//-> 현재 노드를 종료하고 재시작 한다.
+	//		if (NextAction == ECharacterAction::Attack)
+	//		{
+	//			UE_LOG(LogTemp, Log, TEXT("CheckedFalse"));
+	//			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+	//		}
+	//	}
+	//);
+	//AIPawn->SetAIReserveTimeFinishedDelegate(OnReserveTimeFinished);
+
 	//공격이 끝났을때 시행할 행동 바인딩
-	FAICharacterAttackFinished OnAttackFinished;
+	FSimpleDelegate OnAttackFinished;
 	OnAttackFinished.BindLambda(
 		[&]()
 		{
@@ -48,24 +68,13 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 void UBTTask_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-
-	//공격 타겟이 있는지 확인, 없을 경우 return
-	APawn* TargetPawn = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGET));
-
+	SetNextTickTime(NodeMemory, 0.1f);
+	
 	APawn* ControllingPawn = Cast<APawn>(OwnerComp.GetAIOwner()->GetPawn());
 	if (nullptr == ControllingPawn) { return; }
 
 	IABCharacterAIInterface* AIPawn = Cast<IABCharacterAIInterface>(ControllingPawn);
 	if (nullptr == AIPawn) { return; }
 
-	//'공격' 액션은 바로 끝나는 액션이 아님.
-	//공격 몽타주가 재생되고, 끝나야 비로소 공격이 끝났다고 할 수 있음.
-	if (TargetPawn)
-	{
-		AIPawn->AttackByAI();
-	}
-	else
-	{
-		//AbortTask();
-	}
+	AIPawn->AI_Attack();
 }

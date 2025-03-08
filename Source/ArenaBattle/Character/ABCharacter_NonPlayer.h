@@ -3,9 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Character/ABCharacterBase.h"
+#include "Character/ABCharacter_Common.h"
 #include "Interface/ABCharacterAIInterface.h"
+
 #include "Engine/StreamableManager.h"	//TSTreamableHandle
+
 #include "ABCharacter_NonPlayer.generated.h"
 
 /**
@@ -46,11 +50,14 @@ protected:
 	virtual float GetAIAttackRange() override;
 	virtual float GetAITurnSpeed() override;
 
-	virtual void SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished) override;
-	virtual void AttackByAI() override;
-	virtual void AttackStop() override;
-
-	FAICharacterAttackFinished OnAttackFinished;
+	virtual void SetAIAttackDelegate(const FSimpleDelegate& InOnAttackFinished) override;
+	virtual void SetAIReserveTimeFinishedDelegate(const FOnReserveTimeEndDelegate& InOnReserveTimeFinished) override;
+	virtual void AI_Attack() override;
+	virtual void AI_Idle() override;
 
 	virtual void NotifyComboActionEnd() override;
+	virtual void NotifyReserveTimeEnd() override;
+
+	FSimpleDelegate OnAttackFinished;
+	FOnReserveTimeEndDelegate OnReserveTimeFinished;
 };

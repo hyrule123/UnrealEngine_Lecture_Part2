@@ -165,6 +165,7 @@ bool AABCharacterBase::TryReserveAction(ECharacterAction InAction)
 	return false;
 }
 
+
 void AABCharacterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -258,8 +259,12 @@ void AABCharacterBase::SetReserveActionTimer_ComboAttack()
 
 void AABCharacterBase::CheckReservedAction()
 {
+	//선입력 종료 타이밍 델리게이트 호출
+	NotifyReserveTimeEnd();
+
 	//타이머 OFF
 	ReserveActionTimer.Invalidate();
+
 	if (ReservedAction == ECharacterAction::None) { return; }
 
 	//시간 안에 다음 콤보 커맨드가 들어왔으면 다음 콤보 몽타주로 넘어간다.

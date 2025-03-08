@@ -84,26 +84,43 @@ float AABCharacter_NonPlayer::GetAITurnSpeed()
 	return 2.0f;
 }
 
-void AABCharacter_NonPlayer::SetAIAttackDelegate(const FAICharacterAttackFinished& InOnAttackFinished)
+void AABCharacter_NonPlayer::SetAIAttackDelegate(const FSimpleDelegate& InOnAttackFinished)
 {
 	OnAttackFinished = InOnAttackFinished;
 }
 
-void AABCharacter_NonPlayer::AttackByAI()
+void AABCharacter_NonPlayer::SetAIReserveTimeFinishedDelegate(const FOnReserveTimeEndDelegate& InOnReserveTimeFinished)
+{
+	OnReserveTimeFinished = InOnReserveTimeFinished;
+}
+
+void AABCharacter_NonPlayer::AI_Attack()
 {
 	ProcessComboCommand();
 }
 
-void AABCharacter_NonPlayer::AttackStop()
-{	
-	if (GetReservedAction() == ECharacterAction::Attack)
-	{
-		TryReserveAction(ECharacterAction::None);
-	}
+void AABCharacter_NonPlayer::AI_Idle()
+{
+	TryReserveAction(ECharacterAction::None);
 }
 
 void AABCharacter_NonPlayer::NotifyComboActionEnd()
 {
 	Super::NotifyComboActionEnd();
-	OnAttackFinished.ExecuteIfBound();
+	if (OnAttackFinished.IsBound())
+	{
+		OnAttackFinished.Execute();
+		OnAttackFinished.Unbind();
+	}
+}
+
+void AABCharacter_NonPlayer::NotifyReserveTimeEnd()
+{
+	Super::NotifyReserveTimeEnd();
+	if (OnReserveTimeFinished.IsBound())
+	{
+		//다음에 예약된 액션 정보를 인자로 넘겨서 호출
+		OnReserveTimeFinished.Execute(GetReservedAction());
+		OnReserveTimeFinished.Unbind();
+	}
 }
