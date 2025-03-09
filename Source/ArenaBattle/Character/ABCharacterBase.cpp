@@ -464,7 +464,7 @@ void AABCharacterBase::TakeItem(UABItemData* InItemData)
 {
 	if (InItemData)
 	{
-		TakeItemActions[(uint8)InItemData->Type].ItemDelegate.ExecuteIfBound(InItemData);
+		TakeItemActions[(uint8)InItemData->GetItemType()].ItemDelegate.ExecuteIfBound(InItemData);
 	}
 }
 

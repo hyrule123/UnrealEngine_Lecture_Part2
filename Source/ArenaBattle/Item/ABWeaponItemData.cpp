@@ -6,4 +6,9 @@
 UABWeaponItemData::UABWeaponItemData()
 {
 	Type = EItemType::Weapon;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Img(TEXT("/Script/Engine.Texture2D'/Game/Icons/sword_185.sword_185'"));
+	ensure(Img.Succeeded());
+
+	Super::IconImage = Img.Object;
 }

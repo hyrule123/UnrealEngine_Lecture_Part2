@@ -6,5 +6,10 @@
 
 UABPotionItemData::UABPotionItemData()
 {
-	Type = EItemType::Potion;
+	Super::Type = EItemType::Potion;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Img(TEXT("/Script/Engine.Texture2D'/Game/Icons/MediumHealthPotion.MediumHealthPotion'"));
+	ensure(Img.Succeeded());
+
+	Super::IconImage = Img.Object;
 }

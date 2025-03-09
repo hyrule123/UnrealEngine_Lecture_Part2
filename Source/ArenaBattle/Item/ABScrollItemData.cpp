@@ -6,4 +6,9 @@
 UABScrollItemData::UABScrollItemData()
 {
 	Type = EItemType::Scroll;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Img(TEXT("/Script/Engine.Texture2D'/Game/Icons/olden_treasure_map.olden_treasure_map'"));
+	ensure(Img.Succeeded());
+
+	Super::IconImage = Img.Object;
 }

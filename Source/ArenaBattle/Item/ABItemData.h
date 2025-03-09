@@ -36,6 +36,13 @@ public:
 		return FPrimaryAssetId(TEXT("ABItemData"), GetFName());
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = ItemType)
+	EItemType GetItemType() const { return Type; }
+	TObjectPtr<class UTexture2D> GetItemImage() const { return IconImage; }
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ItemType)
 	EItemType Type;
+
+	UPROPERTY(VisibleAnywhere, Category = ItemType)
+	TObjectPtr<class UTexture2D> IconImage;
 };

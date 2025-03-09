@@ -5,6 +5,7 @@
 #include "Interface/ABCharacterItemInterface.h"
 #include "Item/ABItemData.h"
 
+#include "Components/BillboardComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -45,6 +46,13 @@ AABItemBox::AABItemBox()
 		Effect->SetTemplate(EffectRef.Object);
 		Effect->bAutoActivate = false;//자동 실행 x
 	}
+
+	ItemIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("ItemIcon"));
+	ItemIcon->SetupAttachment(Trigger);
+	ItemIcon->SetRelativeLocation({ 0.0f, 0.0f, 100.0f });
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Img(TEXT("/Script/Engine.Texture2D'/Game/Icons/olden_treasure_map.olden_treasure_map'"));
+	ItemIcon->SetSprite(Img.Object);
 }
 
 void AABItemBox::PostInitializeComponents()
@@ -72,6 +80,20 @@ void AABItemBox::PostInitializeComponents()
 		//Item 변수에 등록.
 		Item = Cast<UABItemData>(AssetPtr.Get());
 		ensure(Item);
+
+		if (Item->GetItemImage())
+		{
+			ItemIcon->SetSprite(Item->GetItemImage());
+			ItemIcon->SetWorldScale3D({ 0.1f, 0.1f, 0.1f });
+			//ItemIcon->bIsScreenSizeScaled = true;
+			//ItemIcon->ScreenSize = 0.0002;
+			ItemIcon->SetHiddenInGame(false);
+			UE_LOG(LogTemp, Log, TEXT("ITEM IMAGE!!"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("NO ITEM IMAGE!!"));
+		}
 	}
 	else {
 		ensure(false == Assets.IsEmpty());
