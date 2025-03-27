@@ -16,3 +16,4 @@ Saved
 # Content 내부에 또다른 git을 만들어 별도로 형상관리 중
 # Release에 비밀번호 걸어서 올릴 예정
 # Content
+/Content.zip

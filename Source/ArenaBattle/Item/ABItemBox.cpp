@@ -4,10 +4,12 @@
 #include "Physics/ABCollision.h"
 #include "Interface/ABCharacterItemInterface.h"
 #include "Item/ABItemData.h"
+#include "UI/ABItemIconWidget.h"
 
 #include "Components/BillboardComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Engine/AssetManager.h"
 
@@ -47,12 +49,16 @@ AABItemBox::AABItemBox()
 		Effect->bAutoActivate = false;//자동 실행 x
 	}
 
-	ItemIcon = CreateDefaultSubobject<UBillboardComponent>(TEXT("ItemIcon"));
-	ItemIcon->SetupAttachment(Trigger);
-	ItemIcon->SetRelativeLocation({ 0.0f, 0.0f, 100.0f });
+	WidgetCom = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemIconWidget"));
+	WidgetCom->SetupAttachment(Trigger);
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> Img(TEXT("/Script/Engine.Texture2D'/Game/Icons/olden_treasure_map.olden_treasure_map'"));
-	ItemIcon->SetSprite(Img.Object);
+	static ConstructorHelpers::FClassFinder<UABItemIconWidget> ItemIconClassInfo(TEXT("/Game/ArenaBattle/UI/WBP_ABItemIcon.WBP_ABItemIcon_C"));
+	check(ItemIconClassInfo.Succeeded());
+	WidgetCom->SetWidgetClass(ItemIconClassInfo.Class);
+
+	WidgetCom->SetWidgetSpace(EWidgetSpace::Screen);
+	WidgetCom->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WidgetCom->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 }
 
 void AABItemBox::PostInitializeComponents()
@@ -83,11 +89,11 @@ void AABItemBox::PostInitializeComponents()
 
 		if (Item->GetItemImage())
 		{
-			ItemIcon->SetSprite(Item->GetItemImage());
-			ItemIcon->SetWorldScale3D({ 0.1f, 0.1f, 0.1f });
-			//ItemIcon->bIsScreenSizeScaled = true;
-			//ItemIcon->ScreenSize = 0.0002;
-			ItemIcon->SetHiddenInGame(false);
+			WidgetCom->InitWidget();
+
+			UABItemIconWidget* IconWidget = Cast<UABItemIconWidget>(WidgetCom->GetWidget());
+			IconWidget->SetIconImage(Item->GetItemImage());
+
 			UE_LOG(LogTemp, Log, TEXT("ITEM IMAGE!!"));
 		}
 		else
@@ -103,6 +109,7 @@ void AABItemBox::PostInitializeComponents()
 	//SpawnActorDeferred로 변경하면서 델리게이트 등록을 뒤로 미룸
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABItemBox::OnOverlapBegin);
 }
+
 
 void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {

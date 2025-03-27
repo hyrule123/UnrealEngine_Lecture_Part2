@@ -35,7 +35,7 @@ void AABPlayerController::BeginPlay()
 	//Blueprint에서 생성하는 것으로 변경하였음.
 	/*
 	ABHUDWidget = CreateWidget<UABHUDWidget>(this, ABHUDWidgetClass);
-	//위젯을 성공적으로 생성했으면 화면에 띄워준다
+	//위젯을 성공적으로 생성했으면 화면에 띄워준다 
 	if (ABHUDWidget)
 	{
 		ABHUDWidget->AddToViewport();

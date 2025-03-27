@@ -41,8 +41,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TObjectPtr<class UBillboardComponent> ItemIcon;
 
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	TObjectPtr<class UWidgetComponent> WidgetCom;
+
 	//PrimitiveComponent에 있는 델리게이트 함수 선언
-	//OnComponentBeginOverlap이라는 델리게이트 변수에 등록할 수 있다.
+	//OnComponentBeginOverlap이라는 델리게이트 q변수에 등록할 수 있다.
 	//블루프린트에서도 사용 가능한 Dynamic Delegete이므로 UFUNCION으로 지정이 필요하다.
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
