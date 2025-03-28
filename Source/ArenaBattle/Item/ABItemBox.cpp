@@ -6,7 +6,6 @@
 #include "Item/ABItemData.h"
 #include "UI/ABItemIconWidget.h"
 
-#include "Components/BillboardComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
@@ -16,6 +15,8 @@
 // Sets default values
 AABItemBox::AABItemBox()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	//SubObject 생성
 	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -58,7 +59,7 @@ AABItemBox::AABItemBox()
 
 	WidgetCom->SetWidgetSpace(EWidgetSpace::Screen);
 	WidgetCom->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WidgetCom->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+	WidgetCom->SetRelativeLocation(FVector(0.0f, 0.0f, WidgetIconStandardZPos));
 }
 
 void AABItemBox::PostInitializeComponents()
@@ -110,6 +111,31 @@ void AABItemBox::PostInitializeComponents()
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &AABItemBox::OnOverlapBegin);
 }
 
+void AABItemBox::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (WidgetCom)
+	{
+		FVector RelPos = WidgetCom->GetRelativeLocation();
+		//아이템을 위아래로 floating 시킨다
+		if (false == bItemTaken)
+		{
+			AccTime += DeltaSeconds * WidgetIconSpeed;
+
+			RelPos.Z = WidgetIconStandardZPos + FMath::Sin(AccTime) * WidgetIconFloatRange;
+
+			constexpr float _2pi = PI * 2;
+			if (AccTime > _2pi) { AccTime -= _2pi; }
+		}
+		else
+		{
+			RelPos.Z += DeltaSeconds * WidgetIconSpeed * WidgetIconFloatRange;
+		}
+		WidgetCom->SetRelativeLocation(RelPos);
+	}
+}
+
 
 void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
@@ -132,6 +158,8 @@ void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor
 	Mesh->SetHiddenInGame(true);
 	//충돌체크 중단
 	SetActorEnableCollision(false);
+
+	bItemTaken = true;
 
 	//이펙트 끝나고 호출할 델리게이트 등록(자신 제거)
 	Effect->OnSystemFinished.AddDynamic(this, &AABItemBox::OnEffectFinished);

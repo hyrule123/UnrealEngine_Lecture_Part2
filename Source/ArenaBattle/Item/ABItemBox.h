@@ -22,6 +22,8 @@ protected:
 	//랜덤 아이템을 추가한다.
 	virtual void PostInitializeComponents() override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	//캐릭터가 닿으면 작동할 트리거 충돌체
 	UPROPERTY(VisibleAnywhere, Category = "Box")
@@ -38,9 +40,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Item")
 	TObjectPtr<class UABItemData> Item;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item")
-	TObjectPtr<class UBillboardComponent> ItemIcon;
-
 	UPROPERTY(VisibleAnywhere, Category = "UI")
 	TObjectPtr<class UWidgetComponent> WidgetCom;
 
@@ -52,4 +51,16 @@ protected:
 
 	UFUNCTION()
 	void OnEffectFinished(class UParticleSystemComponent* ParticleSystem);
+
+private:
+#pragma region ICON_SECTION
+	constexpr static float WidgetIconFloatRange = 20.0f;
+	constexpr static float WidgetIconSpeed = 3.0f;
+	constexpr static float WidgetIconStandardZPos = 100.0f;
+	UPROPERTY()
+	float AccTime;
+
+	UPROPERTY()
+	uint8 bItemTaken : 1 = false;
+#pragma endregion ICON_SECTION
 };
