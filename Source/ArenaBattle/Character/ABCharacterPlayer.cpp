@@ -115,6 +115,9 @@ void AABCharacterPlayer::Tick(float DeltaSeconds)
 	{
 		EvadeDir = LastInputDirection;
 		bIsMoveActionPressed = false;
+
+		//방향 초기화
+		LastInputDirection = {};
 	}
 }
 
@@ -213,6 +216,8 @@ void AABCharacterPlayer::SetCameraViewMode(ECameraViewMode Mode)
 
 void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 {
+	//UE_LOG(LogTemp, Log, TEXT("%s"), *(Value.ToString()));
+
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -228,7 +233,10 @@ void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 	AddMovementInput(RightDirection, MovementVector.Y);
 
 	bIsMoveActionPressed = true;
-	LastInputDirection = ForwardDirection + RightDirection;
+	float DT = GetWorld()->GetDeltaSeconds();
+	LastInputDirection = 
+		ForwardDirection * MovementVector.X * DT + //정면 이동거리 계산
+		RightDirection * MovementVector.Y * DT;//측면(우측) 이동거리 계산
 	LastInputDirection.Normalize();
 }
 
