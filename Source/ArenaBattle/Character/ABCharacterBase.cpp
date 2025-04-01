@@ -355,7 +355,7 @@ float AABCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	return Stat->ApplyDamage(DamageAmount);
 }
 
-void AABCharacterBase::EvadeIfPossible()
+void AABCharacterBase::TryEvade()
 {
 	if (CurrentState == EvadeState) { return; }
 	if (GetWorld()->GetTimerManager().IsTimerActive(EvadeCoolTimer)) { return; }

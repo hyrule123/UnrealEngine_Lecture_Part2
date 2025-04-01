@@ -91,7 +91,7 @@ protected://Combo Section
 
 //Evade Section
 protected:
-	void EvadeIfPossible();
+	void TryEvade();
 private: 
 	void EvadeNow();
 
